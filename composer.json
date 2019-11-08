@@ -23,5 +23,12 @@
         "psr-4": {
             "NewRelic\\Monolog\\Enricher\\": "src"
         }
+    },
+    "scripts": {
+        "test": "php -d error_reporting=24575 vendor/bin/phpunit",
+        "test-coverage": [
+            "rm -rf coverage",
+            "phpdbg -qrr -d error_reporting=24575 vendor/bin/phpunit --coverage-html=coverage"
+        ]
     }
 }

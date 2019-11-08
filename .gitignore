@@ -2,4 +2,5 @@
 # and Monolog versions.
 composer.lock
 
+coverage
 vendor
