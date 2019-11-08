@@ -1,0 +1,77 @@
+# PHP CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-php/ for more details
+#
+version: 2
+
+test_steps: &test_steps
+  - checkout
+
+  # Download and cache dependencies
+  - restore_cache:
+      keys:
+        # "composer.lock" can be used if it is committed to the repo
+        - v1-dependencies-{{ checksum "composer.json" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+  - run: composer install -n --prefer-dist
+
+  - save_cache:
+      key: v1-dependencies-{{ checksum "composer.json" }}
+      paths:
+        - ./vendor
+
+  - run: composer test
+
+jobs:
+  coding_standard:
+    docker:
+      - image: circleci/php:7-cli
+
+    steps:  
+      # This is almost identical to the &test_steps anchor above, but
+      # unfortunately YAML doesn't have a way to merge lists at present, and we
+      # need a different entry for the final run: command.
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            # "composer.lock" can be used if it is committed to the repo
+            - v1-dependencies-{{ checksum "composer.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: composer install -n --prefer-dist
+
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.json" }}
+          paths:
+            - ./vendor
+
+      - run: composer coding-standard-check
+
+  "php-5.6":
+    docker:
+      - image: circleci/php:5.6-cli
+
+    steps: *test_steps
+
+  "php-7.3":
+    docker:
+      - image: circleci/php:7.3-cli
+
+    steps: *test_steps
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - coding_standard
+      - "php-5.6":
+          requires:
+            - coding_standard
+      - "php-7.3":
+          requires:
+            - coding_standard
