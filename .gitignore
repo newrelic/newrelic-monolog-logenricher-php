@@ -1,0 +1,5 @@
+# We won't commit composer.lock to simplify running tests against different PHP
+# and Monolog versions.
+composer.lock
+
+vendor

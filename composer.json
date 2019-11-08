@@ -1,0 +1,27 @@
+{
+    "name": "newrelic/monolog-enricher",
+    "description": "Monolog components to enable New Relic Logs",
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "New Relic PHP",
+            "email": "php-agent@newrelic.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "monolog/monolog": "^1|^2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4"
+    },
+    "suggest": {
+        "ext-newrelic": "Adds support for viewing logs in context within the New Relic UI"
+    },
+    "autoload": {
+        "psr-4": {
+            "NewRelic\\Monolog\\Enricher\\": "src"
+        }
+    }
+}
