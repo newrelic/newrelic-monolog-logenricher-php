@@ -20,7 +20,7 @@ test_steps: &test_steps
   # versions. For consistency, we'll do this on all PHP images.
   - restore_cache:
       keys:
-        - v1-composer-1.9.1
+        - v1-{{ .Environment.PHP }}-composer-1.9.1
 
   - run:
       # If and when you want to upgrade the Composer version, note that the
@@ -32,20 +32,20 @@ test_steps: &test_steps
       name: Download and verify Composer
 
   - save_cache:
-      key: v1-composer-1.9.1
+      key: v1-{{ .Environment.PHP }}-composer-1.9.1
       paths:
         - ./composer.phar
 
   # Now we'll actually install the packages required to test this package.
   - restore_cache:
       keys:
-        - v1-dependencies-{{ checksum "composer.json" }}
-        - v1-dependencies-
+        - v1-{{ .Environment.PHP }}-dependencies-{{ checksum "composer.json" }}
+        - v1-{{ .Environment.PHP }}-dependencies-
 
   - run: ./composer.phar install -n --prefer-dist
 
   - save_cache:
-      key: v1-dependencies-{{ checksum "composer.json" }}
+      key: v1-{{ .Environment.PHP }}-dependencies-{{ checksum "composer.json" }}
       paths:
         - ./vendor
 
@@ -69,13 +69,13 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "composer.json" }}
-            - v1-dependencies-
+            - v1-cs-dependencies-{{ checksum "composer.json" }}
+            - v1-cs-dependencies-
 
       - run: composer install -n --prefer-dist
 
       - save_cache:
-          key: v1-dependencies-{{ checksum "composer.json" }}
+          key: v1-cs-dependencies-{{ checksum "composer.json" }}
           paths:
             - ./vendor
 
@@ -111,6 +111,7 @@ jobs:
       PATH: /opt/rh/rh-git29/root/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       PERL5LIB: /opt/rh/rh-git29/root/usr/share/perl5/vendor_perl
       LD_LIBRARY_PATH: /opt/rh/httpd24/root/usr/lib64
+      PHP: 5.3
 
     # As with the coding_standard job above, we can't reuse anything from
     # test_steps because YAML doesn't support merging lists. This means there's
@@ -139,8 +140,7 @@ jobs:
       # images.
       - restore_cache:
           keys:
-            - v1-composer-1.9.1
-            - v1-composer-
+            - v1-{{ .Environment.PHP }}-composer-1.9.1
 
       - run:
           # If and when you want to upgrade the Composer version, note that the
@@ -152,15 +152,15 @@ jobs:
           name: Download and verify Composer
 
       - save_cache:
-          key: v1-composer-1.9.1
+          key: v1-{{ .Environment.PHP }}-composer-1.9.1
           paths:
             - ./composer.phar
 
       # Now we'll actually install the packages required to test this package.
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "composer.json" }}
-            - v1-dependencies-
+            - v1-{{ .Environment.PHP }}-dependencies-{{ checksum "composer.json" }}
+            - v1-{{ .Environment.PHP }}-dependencies-
 
       - run:
           # We exclude PHP_CodeSniffer here because no 3.x version supports PHP
@@ -173,7 +173,7 @@ jobs:
           name: Install Composer packages, excluding PHP_CodeSniffer
 
       - save_cache:
-          key: v1-dependencies-{{ checksum "composer.json" }}
+          key: v1-{{ .Environment.PHP }}-dependencies-{{ checksum "composer.json" }}
           paths:
             - ./vendor
 
@@ -184,11 +184,17 @@ jobs:
     docker:
       - image: php:5.4.45-cli
 
+    environment:
+      PHP: 5.4
+
     steps: *test_steps
 
   "php-5.5":
     docker:
       - image: php:5.5.38-cli
+
+    environment:
+      PHP: 5.5
 
     steps: *test_steps
 
@@ -196,11 +202,17 @@ jobs:
     docker:
       - image: php:5.6.40-cli
 
+    environment:
+      PHP: 5.6
+
     steps: *test_steps
 
   "php-7.0":
     docker:
       - image: php:7.0.33-cli
+
+    environment:
+      PHP: 7.0
 
     steps: *test_steps
 
@@ -208,11 +220,17 @@ jobs:
     docker:
       - image: php:7.1.33-cli
 
+    environment:
+      PHP: 7.1
+
     steps: *test_steps
 
   "php-7.2":
     docker:
       - image: php:7.2.24-cli
+
+    environment:
+      PHP: 7.2
 
     steps: *test_steps
 
@@ -220,11 +238,17 @@ jobs:
     docker:
       - image: php:7.3.11-cli
 
+    environment:
+      PHP: 7.3
+
     steps: *test_steps
 
   "php-7.4":
     docker:
       - image: php:7.4.0RC5-cli
+
+    environment:
+      PHP: 7.4
 
     steps: *test_steps
 
