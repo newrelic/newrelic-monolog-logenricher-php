@@ -102,13 +102,34 @@ jobs:
     docker:
       - image: centos:6.10
 
+    # Set up the environment so that there's a "git" binary in the $PATH once
+    # the Git 2.9 software collection is installed below.
+    #
+    # This is replicating what /opt/rh/rh-git29/enable does in conjunction with
+    # the normal environment variables in the centos:6.10 container.
+    environment:
+      PATH: /opt/rh/rh-git29/root/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PERL5LIB: /opt/rh/rh-git29/root/usr/share/perl5/vendor_perl
+      LD_LIBRARY_PATH: /opt/rh/httpd24/root/usr/lib64
+
     # As with the coding_standard job above, we can't reuse anything from
     # test_steps because YAML doesn't support merging lists. This means there's
     # a lot of duplication.
     steps:
-      # We need PHP for obvious reasons, and Git because the CircleCI runner
-      # expects it to be available within the container.
-      - run: yum -y install git php-cli php-xml unzip
+      # We need PHP for obvious reasons, and unzip for Composer. We also need
+      # Git, as CircleCI expects it to be available within the container.
+      # Unfortunately, the Git available by default in CentOS 6's repositories
+      # is too old to work with CircleCI's cloud service (it requires "git
+      # checkout -B" to be available), so we need to get a newer one.
+      #
+      # Fortunately, CentOS has a software collection available with Git 2.9.
+      # Less fortunately, this doesn't put "git" into the path, so we have the
+      # environment variable hackery above.
+      - run:
+          command: |
+            yum -y install php-cli php-xml unzip centos-release-scl
+            yum -y install rh-git29
+          name: Install platform dependencies
 
       - checkout
 
