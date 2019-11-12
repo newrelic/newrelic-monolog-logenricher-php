@@ -1,46 +1,75 @@
-# PHP CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-php/ for more details
-#
 version: 2
 
+# Generic test steps for most of the unit test targets.
+#
+# These should work on any "php" Docker Hub image for version 5.4 or newer:
+# https://hub.docker.com/_/php/
 test_steps: &test_steps
+  # CircleCI expects Git to be available within the container, and Composer
+  # will be quite a bit happier if unzip is available.
+  - run:
+      command: |
+        apt-get update
+        apt-get -y install git unzip
+      name: Install platform dependencies
+
   - checkout
 
-  # Download and cache dependencies
+  # We'll grab and use Composer 1.9.1. Composer is bundled within the CircleCI
+  # PHP images, but these don't go back further than PHP 5.6, and we need older
+  # versions. For consistency, we'll do this on all PHP images.
   - restore_cache:
       keys:
-        # "composer.lock" can be used if it is committed to the repo
+        - v1-composer-1.9.1
+
+  - run:
+      # If and when you want to upgrade the Composer version, note that the
+      # SHA-256 sum below will need to be updated as well.
+      command: |
+        curl -O https://getcomposer.org/download/1.9.1/composer.phar
+        echo '1f210b9037fcf82670d75892dfc44400f13fe9ada7af9e787f93e50e3b764111 *composer.phar' | sha256sum -c
+        chmod 755 composer.phar
+      name: Download and verify Composer
+
+  - save_cache:
+      key: v1-composer-1.9.1
+      paths:
+        - ./composer.phar
+
+  # Now we'll actually install the packages required to test this package.
+  - restore_cache:
+      keys:
         - v1-dependencies-{{ checksum "composer.json" }}
-        # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
 
-  - run: composer install -n --prefer-dist
+  - run: ./composer.phar install -n --prefer-dist
 
   - save_cache:
       key: v1-dependencies-{{ checksum "composer.json" }}
       paths:
         - ./vendor
 
-  - run: composer test
+  # Finally, we'll run the unit tests.
+  - run: ./composer.phar test
 
 jobs:
   coding_standard:
     docker:
+      # Unlike the other test jobs in this file, we'll use CircleCI's PHP image
+      # here so we don't have to install Composer separately.
+      #
+      # Note that the version of PHP doesn't matter here, provided it's a
+      # version that PHP_CodeSniffer 3.5 supports (which is PHP 5.4 or newer).
       - image: circleci/php:7-cli
 
-    steps:  
-      # This is almost identical to the &test_steps anchor above, but
-      # unfortunately YAML doesn't have a way to merge lists at present, and we
-      # need a different entry for the final run: command.
+    # The coding standard job shares some concepts with the test_steps defined
+    # above, but is defined separately due to YAML's inability to merge lists.
+    steps:
       - checkout
 
-      # Download and cache dependencies
       - restore_cache:
           keys:
-            # "composer.lock" can be used if it is committed to the repo
             - v1-dependencies-{{ checksum "composer.json" }}
-            # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
       - run: composer install -n --prefer-dist
@@ -52,15 +81,129 @@ jobs:
 
       - run: composer coding-standard-check
 
+  "php-5.3":
+    # This job is a mess, but for good reasons.
+    #
+    # The big problem we have is that PHP 5.3 is ancient. Docker Hub's
+    # "official" PHP 5.3 images don't include the OpenSSL extension, which is
+    # required for Composer to be remotely safe to run, and also predate the
+    # convenience scripts shipped in more recent versions to build and install
+    # extensions at runtime.
+    #
+    # To sidestep this, we can use CentOS 6, which ships PHP 5.3.3 as its
+    # standard PHP version. This means that we have to do additional setup
+    # before even checking out the repository, but it means that we have all
+    # the extensions we could want a simple yum invocation away.
+    #
+    # If we really cared about the performance of this job, the right thing to
+    # do would be to define a public Docker image that already had Git, the PHP
+    # packages, and Composer baked into it. Realistically, however, we probably
+    # won't support PHP 5.3 for long enough for that to be worthwhile.
+    docker:
+      - image: centos:6.10
+
+    # As with the coding_standard job above, we can't reuse anything from
+    # test_steps because YAML doesn't support merging lists. This means there's
+    # a lot of duplication.
+    steps:
+      # We need PHP for obvious reasons, and Git because the CircleCI runner
+      # expects it to be available within the container.
+      - run: yum -y install git php-cli php-xml unzip
+
+      - checkout
+
+      # We'll grab and use Composer 1.9.1. Composer is bundled within the
+      # CircleCI PHP images, but these don't go back further than PHP 5.6, and
+      # we need older versions. For consistency, we'll do this on all PHP
+      # images.
+      - restore_cache:
+          keys:
+            - v1-composer-1.9.1
+            - v1-composer-
+
+      - run:
+          # If and when you want to upgrade the Composer version, note that the
+          # SHA-256 sum below will need to be updated as well.
+          command: |
+            curl -O https://getcomposer.org/download/1.9.1/composer.phar
+            echo '1f210b9037fcf82670d75892dfc44400f13fe9ada7af9e787f93e50e3b764111 *composer.phar' | sha256sum -c
+            chmod 755 composer.phar
+          name: Download and verify Composer
+
+      - save_cache:
+          key: v1-composer-1.9.1
+          paths:
+            - ./composer.phar
+
+      # Now we'll actually install the packages required to test this package.
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "composer.json" }}
+            - v1-dependencies-
+
+      - run:
+          # We exclude PHP_CodeSniffer here because no 3.x version supports PHP
+          # 5.3, and we need at least 3.5 for the PSR-12 definition. In
+          # practice, we can (and will) run the coding standard check on a much
+          # newer version of PHP.
+          command: |
+            ./composer.phar remove --dev squizlabs/php_codesniffer
+            ./composer.phar install -n --prefer-dist
+          name: Install Composer packages, excluding PHP_CodeSniffer
+
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.json" }}
+          paths:
+            - ./vendor
+
+      # Finally, we'll run the unit tests.
+      - run: ./composer.phar test
+
+  "php-5.4":
+    docker:
+      - image: php:5.4.45-cli
+
+    steps: *test_steps
+
+  "php-5.5":
+    docker:
+      - image: php:5.5.38-cli
+
+    steps: *test_steps
+
   "php-5.6":
     docker:
-      - image: circleci/php:5.6-cli
+      - image: php:5.6.40-cli
+
+    steps: *test_steps
+
+  "php-7.0":
+    docker:
+      - image: php:7.0.33-cli
+
+    steps: *test_steps
+
+  "php-7.1":
+    docker:
+      - image: php:7.1.33-cli
+
+    steps: *test_steps
+
+  "php-7.2":
+    docker:
+      - image: php:7.2.24-cli
 
     steps: *test_steps
 
   "php-7.3":
     docker:
-      - image: circleci/php:7.3-cli
+      - image: php:7.3.11-cli
+
+    steps: *test_steps
+
+  "php-7.4":
+    docker:
+      - image: php:7.4.0RC5-cli
 
     steps: *test_steps
 
@@ -69,9 +212,30 @@ workflows:
   test:
     jobs:
       - coding_standard
+      - "php-5.3":
+          requires:
+            - coding_standard
+      - "php-5.4":
+          requires:
+            - coding_standard
+      - "php-5.5":
+          requires:
+            - coding_standard
       - "php-5.6":
           requires:
             - coding_standard
+      - "php-7.0":
+          requires:
+            - coding_standard
+      - "php-7.1":
+          requires:
+            - coding_standard
+      - "php-7.2":
+          requires:
+            - coding_standard
       - "php-7.3":
+          requires:
+            - coding_standard
+      - "php-7.4":
           requires:
             - coding_standard
