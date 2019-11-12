@@ -168,13 +168,14 @@ jobs:
           # practice, we can (and will) run the coding standard check on a much
           # newer version of PHP.
           command: |
-            ./composer.phar remove --dev squizlabs/php_codesniffer
+            ./composer.phar remove --dev --no-update squizlabs/php_codesniffer
             ./composer.phar install -n --prefer-dist
           name: Install Composer packages, excluding PHP_CodeSniffer
 
       - save_cache:
           key: v1-{{ .Environment.PHP }}-dependencies-{{ checksum "composer.json" }}
           paths:
+            - ./composer.lock
             - ./vendor
 
       # Finally, we'll run the unit tests.
