@@ -1,35 +1,92 @@
 <?php
 
+/**
+ * Copyright [2019] New Relic Corporation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * This file contains the tests for the New Relic Monolog Enricher
+ * Processor. Tests must cover cases when a compatible New Relic
+ * extension (v9.3 or higher) is not available
+ *
+ * @author New Relic PHP <php-agent@newrelic.com>
+ */
+
 namespace NewRelic\Monolog\Enricher;
 
 use PHPUnit_Framework_TestCase;
 
-// A top secret PHP trick: you can't mock global functions like
-// newrelic_get_linking_metadata() using PHPUnit's built in mocking support,
-// because that can only handle classes, but you can use PHP's name resolution
-// rules to get the same effect.
-//
-// If you have a function call xyz() within a namespace Foo\Bar, PHP will try
-// to look up the function in this way:
-// 1. Foo\Bar\xyz()
-// 2. \xyz()
-//
-// Therefore, if you define the function within the same namespace, you can
-// override the function that would otherwise be called.
+/**
+ * Override the New Relic PHP Extension's `newrelic_get_linking_metadata()`
+ * function to mock a response
+ *
+ * @return array
+ */
 function newrelic_get_linking_metadata()
 {
-    return array();
+    return array('hostname' => 'example.host',
+                 'entity.name' => 'Processor Tests',
+                 'entity.type' => 'SERVICE');
 }
 
 class ProcessorTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * getMockedProcessor returns a mocked NewRelic\Monolog\Enricher\Processor
+     * that is configured to return a set value in
+     * `Processor::contextAvailable`. This allows testing scenarios where a
+     * compatible New Relic extension (v9.3 or higher) is not available.
+     *
+     * @param bool $nr_ext_compat Whether a compatible extension was 'found'
+     * @return MockedProcessor
+     */
+    private function getMockedProcessor($nr_ext_compat)
+    {
+        $proc = $this->getMockBuilder('NewRelic\Monolog\Enricher\Processor')
+                     ->setMethods(array('contextAvailable'))
+                     ->getMock();
+        $proc->method('contextAvailable')
+             ->willReturn($nr_ext_compat);
+
+        return $proc;
+    }
+
+    /**
+     * Tests that the array returned by `newrelic_get_linking_metadata()`
+     * is inserted at `$logRecord['extra']['newrelic-context'] when a
+     * compatible New Relic extension is loaded
+     */
     public function testInvoke()
     {
-        // TODO: extend this so it tests the eventual behaviour of
-        // Processor::__invoke().
         $input = array('foo' => 'bar');
 
-        $proc = new Processor();
+        $proc = $this->getMockedProcessor(true);
+        $enriched_record = $proc($input);
+
+        $expected = newrelic_get_linking_metadata();
+        $got = $enriched_record['extra']['newrelic-context'];
+        $this->assertSame($expected, $got);
+    }
+
+    /**
+     * Tests that the given Monolog record is returned unchanged when a
+     * compatible New Relic extension is not loaded
+     */
+    public function testInputPassthroughWhenNewRelicNotLoaded()
+    {
+        $input = array('foo' => 'bar');
+        $proc = $this->getMockedProcessor(false);
+
         $this->assertSame($input, $proc($input));
+    }
+
+    /**
+     * Tests that the given Monolog record is returned unchanged when a
+     * compatible New Relic extension is not loaded
+     */
+    public function testContextAvailbleMatchesFnExistsCall()
+    {
+        $proc = new Processor();
+        $exists = function_exists('newrelic_get_linking_metadata');
+        $this->assertSame($exists, $proc->contextAvailable());
     }
 }
