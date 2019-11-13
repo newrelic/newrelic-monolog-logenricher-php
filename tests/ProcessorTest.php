@@ -78,15 +78,4 @@ class ProcessorTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($input, $proc($input));
     }
-
-    /**
-     * Tests that the given Monolog record is returned unchanged when a
-     * compatible New Relic extension is not loaded
-     */
-    public function testContextAvailbleMatchesFnExistsCall()
-    {
-        $proc = new Processor();
-        $exists = function_exists('newrelic_get_linking_metadata');
-        $this->assertSame($exists, $proc->contextAvailable());
-    }
 }

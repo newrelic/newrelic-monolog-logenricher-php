@@ -6,7 +6,7 @@
  *
  * This file contains the Processor class for the New Relic Monolog Enricher.
  * When invoked, the class adds contextual metadata to a Monolog record that
- * links the log to the current New Relic entity.
+ * links the log to the current New Relic application.
  *
  * @author New Relic PHP <php-agent@newrelic.com>
  */
@@ -16,8 +16,8 @@ namespace NewRelic\Monolog\Enricher;
 use Monolog\Processor\ProcessorInterface;
 
 /**
-  * Adds metadata to log that associates it with the current New Relic entity
-  */
+ * Adds metadata to log that associates it with current New Relic application
+ */
 class Processor implements ProcessorInterface
 {
     /**
@@ -40,9 +40,9 @@ class Processor implements ProcessorInterface
     /**
      * Checks if a compatible New Relic extension (v9.3 or higher) is loaded
      *
-     * @return boolean
+     * @return bool
      */
-    public function contextAvailable()
+    protected function contextAvailable()
     {
         return function_exists('newrelic_get_linking_metadata');
     }
