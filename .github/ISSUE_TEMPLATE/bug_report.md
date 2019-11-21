@@ -22,16 +22,17 @@ assignees: ''
 
 [NOTE]: # ( Tell us what you expected to happen. )
 
-## Relevant Logs / Console output
+## Relevant Logs / Code Samples
 
-[NOTE]: # ( Please provide specifics of the local error logs, Browser Dev Tools console, etc. if appropriate and possible. )
+[NOTE]: # ( Please provide any error logs or code samples if appropriate and possible. )
 
 ## Your Environment
 
 [TIP]:  # ( Include as many relevant details about your environment as possible. )
 
-* ex: Browser name and version:
-* ex: Operating System and version:
+* ex: PHP version
+* ex: Monolog version
+* ex: Operating system (and distribution, if relevant)
 
 ## Additional context
 
