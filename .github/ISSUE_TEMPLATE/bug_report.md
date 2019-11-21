@@ -31,8 +31,9 @@ assignees: ''
 [TIP]:  # ( Include as many relevant details about your environment as possible. )
 
 * ex: PHP version
-* ex: Monolog version
 * ex: Operating system (and distribution, if relevant)
+* ex: Monolog version
+* ex: Monolog configuration (which handlers and processors are in use)
 
 You can run this command in your project to quickly gather the version and OS
 information:
