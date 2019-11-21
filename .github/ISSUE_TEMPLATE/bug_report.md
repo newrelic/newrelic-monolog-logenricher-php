@@ -34,6 +34,13 @@ assignees: ''
 * ex: Monolog version
 * ex: Operating system (and distribution, if relevant)
 
+You can run this command in your project to quickly gather the version and OS
+information:
+
+```sh
+php -v | head -n1; echo; composer show | grep 'monolog'; echo; uname -a; echo; [ -f /etc/lsb-release ] && cat /etc/lsb-release
+```
+
 ## Additional context
 
 [TIP]:  # ( Add any other context about the problem here. )
