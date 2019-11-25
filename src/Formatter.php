@@ -42,12 +42,12 @@ class Formatter extends JsonFormatter
     protected function normalize($data, $depth = 0)
     {
 
-        if($depth == 0) {
+        if ($depth == 0) {
             if (isset($data['extra']['newrelic-context'])) {
                 $data = array_merge($data, $data['extra']['newrelic-context']);
                 unset($data['extra']['newrelic-context']);
             }
-            $data['timestamp'] = floor($data['datetime']->format('U.u') * 1000); 
+            $data['timestamp'] = floor($data['datetime']->format('U.u') * 1000);
             unset($data['datetime']);
         }
         return parent::normalize($data, $depth);

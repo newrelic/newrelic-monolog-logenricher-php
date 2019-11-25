@@ -62,18 +62,18 @@ class FormatterTest extends PHPUnit_Framework_TestCase
     private function getExpectedForRecord($record, $with_newline = true)
     {
         $expected = '{"message":"test","context":[],"level":300,'
-            .'"level_name":"WARNING","channel":"test","extra":[],';
+            . '"level_name":"WARNING","channel":"test","extra":[],';
 
         if (isset($record['extra']['newrelic-context'])) {
-            $expected = $expected.'"hostname":"example.host",'
-                .'"entity.name":"Processor Tests","entity.type":"SERVICE",'
-                .'"trace.id":"aabb1234AABB4321","span.id":"wxyz9876WXYZ6789",';
+            $expected = $expected . '"hostname":"example.host",'
+                . '"entity.name":"Processor Tests","entity.type":"SERVICE",'
+                . '"trace.id":"aabb1234AABB4321","span.id":"wxyz9876WXYZ6789",';
         }
 
-        $expected = $expected.'"timestamp":'.floor($record['datetime']->format('U.u') * 1000).'}';
+        $expected = $expected . '"timestamp":' . floor($record['datetime']->format('U.u') * 1000) . '}';
             
         if ($with_newline) {
-            $expected = $expected."\n";
+            $expected = $expected . "\n";
         }
 
         return $expected;
@@ -104,19 +104,25 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         // Test with trailing newline
         $formatter = new Formatter();
         $record = $this->getRecord();
-        $this->assertEquals($this->getExpectedForRecord($record),
-            $formatter->format($record));
+        $this->assertEquals(
+            $this->getExpectedForRecord($record),
+            $formatter->format($record)
+        );
 
         // Test without trailing newline
         $formatter = new Formatter(false);
-        $this->assertEquals($this->getExpectedForRecord($record, false),
-            $formatter->format($record));
+        $this->assertEquals(
+            $this->getExpectedForRecord($record, false),
+            $formatter->format($record)
+        );
 
         // Test without New Relic context information
         $formatter = new Formatter();
         $record = $this->getRecord(false);
-        $this->assertEquals($this->getExpectedForRecord($record),
-            $formatter->format($record));
+        $this->assertEquals(
+            $this->getExpectedForRecord($record),
+            $formatter->format($record)
+        );
     }
 
     /**
@@ -136,7 +142,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
             // Separate entries by newline, however do not append final
             // newline, to match Monolog\JsonFormatter::formatBatchNewlines behavior
             $this->getExpectedForRecord($records[0])
-            .$this->getExpectedForRecord($records[1], false),
+            . $this->getExpectedForRecord($records[1], false),
             $formatter->formatBatch($records)
         );
     }
