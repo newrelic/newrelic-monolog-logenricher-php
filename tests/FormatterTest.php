@@ -70,8 +70,9 @@ class FormatterTest extends PHPUnit_Framework_TestCase
                 . '"trace.id":"aabb1234AABB4321","span.id":"wxyz9876WXYZ6789",';
         }
 
-        $expected = $expected . '"timestamp":' . floor($record['datetime']->format('U.u') * 1000) . '}';
-            
+        $expected = $expected . '"timestamp":'
+            . floor($record['datetime']->format('U.u') * 1000) . '}';
+
         if ($with_newline) {
             $expected = $expected . "\n";
         }
@@ -86,18 +87,24 @@ class FormatterTest extends PHPUnit_Framework_TestCase
     {
         // Verify default parameters
         $formatter = new Formatter();
-        $this->assertEquals(Formatter::BATCH_MODE_NEWLINES, $formatter->getBatchMode());
+        $this->assertEquals(
+            Formatter::BATCH_MODE_NEWLINES,
+            $formatter->getBatchMode()
+        );
         $this->assertEquals(true, $formatter->isAppendingNewlines());
 
         // Verify that trailing newlines can be disabled
         $formatter = new Formatter(false);
-        $this->assertEquals(Formatter::BATCH_MODE_NEWLINES, $formatter->getBatchMode());
+        $this->assertEquals(
+            Formatter::BATCH_MODE_NEWLINES,
+            $formatter->getBatchMode()
+        );
         $this->assertEquals(false, $formatter->isAppendingNewlines());
     }
 
     /**
-     * Tests format which in turn calls overridden normalize method containing the
-     * New Relic transformations
+     * Tests format which in turn calls overridden normalize method containing
+     * the New Relic transformations
      */
     public function testFormat()
     {
@@ -139,8 +146,8 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals(
-            // Separate entries by newline, however do not append final
-            // newline, to match Monolog\JsonFormatter::formatBatchNewlines behavior
+            // Separate entries by newline, however do not append final newline
+            // to match Monolog\JsonFormatter::formatBatchNewlines behavior
             $this->getExpectedForRecord($records[0])
             . $this->getExpectedForRecord($records[1], false),
             $formatter->formatBatch($records)
