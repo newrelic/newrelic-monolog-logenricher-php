@@ -14,6 +14,7 @@
 namespace NewRelic\Monolog\Enricher;
 
 use Monolog\Formatter\JsonFormatter;
+use Monolog\Logger;
 
 /**
  * Formats record as a JSON object with transformations necessary for
@@ -47,7 +48,9 @@ class Formatter extends JsonFormatter
                 $data = array_merge($data, $data['extra']['newrelic-context']);
                 unset($data['extra']['newrelic-context']);
             }
-            $data['timestamp'] = floor($data['datetime']->format('U.u') * 1000);
+            $data['timestamp'] = intval(
+                $data['datetime']->format('U.u') * 1000
+            );
             unset($data['datetime']);
         }
         return parent::normalize($data, $depth);

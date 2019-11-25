@@ -13,6 +13,7 @@
 namespace NewRelic\Monolog\Enricher;
 
 use DateTime;
+use Monolog\Logger;
 use PHPUnit_Framework_TestCase;
 
 class FormatterTest extends PHPUnit_Framework_TestCase
@@ -61,8 +62,11 @@ class FormatterTest extends PHPUnit_Framework_TestCase
      */
     private function getExpectedForRecord($record, $with_newline = true)
     {
-        $expected = '{"message":"test","context":[],"level":300,'
-            . '"level_name":"WARNING","channel":"test","extra":[],';
+        $expected =
+        '{"message":"test",'
+        . '"context":' . (Logger::API == 1 ? '[]' : '{}') . ','
+        . '"level":300,"level_name":"WARNING","channel":"test",'
+        . '"extra":' . (Logger::API == 1 ? '[]' : '{}') . ',';
 
         if (isset($record['extra']['newrelic-context'])) {
             $expected = $expected . '"hostname":"example.host",'
@@ -71,11 +75,8 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         }
 
         $expected = $expected . '"timestamp":'
-            . floor($record['datetime']->format('U.u') * 1000) . '}';
-
-        if ($with_newline) {
-            $expected = $expected . "\n";
-        }
+            . intval($record['datetime']->format('U.u') * 1000) . '}'
+            . ($with_newline ? "\n" : '');
 
         return $expected;
     }
