@@ -6,7 +6,10 @@
  *
  * This file contains the Formatter class for the New Relic Monolog Enricher.
  * This class formats a Monolog record as a JSON object with a compatible
- * timestamp, and any New Relic context information moved to the top-level
+ * timestamp, and any New Relic context information moved to the top-level.
+ * The resulting output is intended to be sent to New Relic Logs via a
+ * compatible log forwarder with New Relic plugin installed (see this
+ * project's README for links to available plugins).
  *
  * @author New Relic PHP <php-agent@newrelic.com>
  */
@@ -27,6 +30,9 @@ class Formatter extends JsonFormatter
      */
     public function __construct($appendNewline = true)
     {
+        // BATCH_MODE_NEWLINES is required for compatibility with New Relic
+        // log forwarder plugins, which handle batching records in accordance
+        // with the New Relic Logging API
         parent::__construct(self::BATCH_MODE_NEWLINES, $appendNewline);
     }
 
@@ -38,11 +44,11 @@ class Formatter extends JsonFormatter
      * as milliseconds since the UNIX epoch, and finally, normalizes the data
      *
      * @param mixed $data
+     * @param int $depth
      * @return mixed
      */
     protected function normalize($data, $depth = 0)
     {
-
         if ($depth == 0) {
             if (isset($data['extra']['newrelic-context'])) {
                 $data = array_merge($data, $data['extra']['newrelic-context']);
@@ -51,7 +57,6 @@ class Formatter extends JsonFormatter
             $data['timestamp'] = intval(
                 $data['datetime']->format('U.u') * 1000
             );
-            unset($data['datetime']);
         }
         return parent::normalize($data, $depth);
     }
