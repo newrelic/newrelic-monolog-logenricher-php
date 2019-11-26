@@ -23,10 +23,10 @@ class FormatterTest extends PHPUnit_Framework_TestCase
      * Generates a Monolog record that optionally contains New Relic
      * context information (enabled by default)
      *
-     * @param bool $with_nr_context
+     * @param bool $withNrContext
      * @return array
      */
-    private function getRecord($with_nr_context = true)
+    private function getRecord($withNrContext)
     {
         $record = array(
             'message' => 'test',
@@ -38,7 +38,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
             'datetime' => new DateTime(),
         );
 
-        if ($with_nr_context) {
+        if ($withNrContext) {
             $nr_context = array(
                 'hostname' => 'example.host',
                 'entity.name' => 'Processor Tests',
@@ -57,16 +57,17 @@ class FormatterTest extends PHPUnit_Framework_TestCase
      * Optionally appends a trailing newline (enabled by default)
      *
      * @param array $record
-     * @param bool $with_newline
+     * @param bool $appendNewline
      * @return array
      */
-    private function getExpectedForRecord($record, $with_newline = true)
+    private function getExpectedForRecord($record, $appendNewline = true)
     {
         $expected =
         '{"message":"test",'
         . '"context":' . (Logger::API == 1 ? '[]' : '{}') . ','
         . '"level":300,"level_name":"WARNING","channel":"test",'
-        . '"extra":' . (Logger::API == 1 ? '[]' : '{}') . ',';
+        . '"extra":' . (Logger::API == 1 ? '[]' : '{}') . ','
+        . '"datetime":' . json_encode($record['datetime']) . ',';
 
         if (isset($record['extra']['newrelic-context'])) {
             $expected = $expected . '"hostname":"example.host",'
@@ -76,7 +77,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
 
         $expected = $expected . '"timestamp":'
             . intval($record['datetime']->format('U.u') * 1000) . '}'
-            . ($with_newline ? "\n" : '');
+            . ($appendNewline ? "\n" : '');
 
         return $expected;
     }
@@ -111,7 +112,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
     {
         // Test with trailing newline
         $formatter = new Formatter();
-        $record = $this->getRecord();
+        $record = $this->getRecord(true);
         $this->assertEquals(
             $this->getExpectedForRecord($record),
             $formatter->format($record)
@@ -142,7 +143,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         $formatter = new Formatter();
         // One record with New Relic context information, one without
         $records = array(
-            $this->getRecord(),
+            $this->getRecord(true),
             $this->getRecord(false),
         );
 
