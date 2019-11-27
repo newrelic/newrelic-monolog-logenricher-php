@@ -4,12 +4,9 @@
  * Copyright [2019] New Relic Corporation. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
- * This file contains the Formatter class for the New Relic Monolog Enricher.
- * This class formats a Monolog record as a JSON object with a compatible
- * timestamp, and any New Relic context information moved to the top-level.
- * The resulting output is intended to be sent to New Relic Logs via a
- * compatible log forwarder with New Relic plugin installed (see this
- * project's README for links to available plugins).
+ * This file contains the abstract parent of the Handler class for
+ * the New Relic Monolog Enricher. This class implements all functionality
+ * that is compatible with all Monolog API versions
  *
  * @author New Relic PHP <php-agent@newrelic.com>
  */
@@ -23,7 +20,7 @@ use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Util;
 
-class Handler extends AbstractProcessingHandler
+abstract class AbstractHandler extends AbstractProcessingHandler
 {
     protected $host = 'log-api.newrelic.com';
     protected $endpoint = 'log/v1';
@@ -51,16 +48,35 @@ class Handler extends AbstractProcessingHandler
         parent::__construct($level, $bubble);
     }
 
+    /**
+     * Sets the New Relic license key. Defaults to the New Relic INI's
+     * value for 'newrelic.license' if available.
+     *
+     * @param  string    $host
+     */
     public function setLicenseKey($key)
     {
         $this->licenseKey = $key;
     }
 
+    /**
+     * Sets the hostname of the New Relic Logging API. Defaults to the
+     * US Prod endpoint (log-api.newrelic.com). Another useful value is
+     * log-api.eu.newrelic.com for the EU production endpoint.
+     *
+     * @param  string    $host
+     */
     public function setHost($host)
     {
         $this->host = $host;
     }
 
+    /**
+     * Obtains a curl handler initialized to POST to the host specified by
+     * $this->setHost()
+     *
+     * @return  resource    $ch             curl handler
+     */
     private function getCurlHandler()
     {
         $url = sprintf("https://%s/%s", $this->host, $this->endpoint);
@@ -71,28 +87,38 @@ class Handler extends AbstractProcessingHandler
         return $ch;
     }
 
-    protected function write(array $record)
+    /**
+     * Augments JSON-formatted data with New Relic license key and other
+     * necessary headers, and POSTs the log to the New Relic logging
+     * endpoint via Curl
+     *
+     * @param string $data
+     */
+    protected function send($data)
     {
-        $this->send($record["formatted"]);
+        $ch = $this->getCurlHandler();
+
+        $headers = array('Content-Type: application/json',
+                    'X-License-Key: ' . $this->licenseKey);
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        Curl\Util::execute($ch, 5, false);
     }
 
-    public function handleBatch(array $records)
-    {
-        $level = $this->level;
-        $records = array_filter($records, function ($record) use ($level) {
-            return ($record['level'] >= $level);
-        });
-        if ($records) {
-            $this->sendBatch($this->getFormatter()->formatBatch($records));
-        }
-    }
-
+    /**
+     * Augments a JSON-formatted array data with New Relic license key
+     * and other necessary headers, and POSTs the log to the New Relic
+     * logging endpoint via Curl
+     *
+     * @param string $data
+     */
     protected function sendBatch($data)
     {
         $ch = $this->getCurlHandler();
 
-        $headers = ['Content-Type: application/json',
-                    'X-License-Key: ' . $this->licenseKey];
+        $headers = array('Content-Type: application/json',
+                    'X-License-Key: ' . $this->licenseKey);
 
         $postData = '[{"logs":' . $data . '}]';
 
@@ -100,32 +126,12 @@ class Handler extends AbstractProcessingHandler
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         Curl\Util::execute($ch, 5, false);
     }
-
-    protected function send($data)
-    {
-        $ch = $this->getCurlHandler();
-
-        $headers = ['Content-Type: application/json',
-                    'X-License-Key: ' . $this->licenseKey];
-
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        Curl\Util::execute($ch, 5, false);
-    }
-
-    public function setFormatter(FormatterInterface $formatter)
-    {
-        if ($formatter instanceof Formatter) {
-            return parent::setFormatter($formatter);
-        }
-        $fq = 'NewRelic\Monolog\Enricher\Handler'
-        throw new \InvalidArgumentException(
-            $fq . ' is only compatible with ' . $fq
-        );
-    }
-
-    protected function getDefaultFormatter()
-    {
-        return new Formatter(Formatter::BATCH_MODE_JSON, false);
-    }
 }
+
+// phpcs:disable
+if (Logger::API == 2) {
+    require_once dirname(__FILE__) . '/api2/Handler.php';
+} else {
+    require_once dirname(__FILE__) . '/api1/Handler.php';
+}
+// phpcs:enable
