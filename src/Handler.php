@@ -20,35 +20,50 @@ use Monolog\Handler\Curl;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger;
 use Monolog\Formatter\FormatterInterface;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Util;
 
 class Handler extends AbstractProcessingHandler
 {
-    protected const HOST = 'staging-log-api.newrelic.com';
-    protected const ENDPOINT = 'log/v1';
+    protected $host = 'log-api.newrelic.com';
+    protected $endpoint = 'log/v1';
     protected $licenseKey;
 
     /**
-     * @param string|int $level  The minimum logging level to trigger this handler
-     * @param bool       $bubble Whether or not messages that are handled should bubble up the stack.
+     * @param string|int $level  The minimum logging level to trigger handler
+     * @param bool       $bubble Whether messages should bubble up the stack.
      *
      * @throws MissingExtensionException If the curl extension is missing
      */
-    public function __construct($level = Logger::DEBUG, bool $bubble = true)
+    public function __construct($level = Logger::DEBUG, $bubble = true)
     {
         if (!extension_loaded('curl')) {
-            throw new MissingExtensionException('The curl extension is needed to use the LogglyHandler');
+            throw new MissingExtensionException(
+                'The curl extension is needed to use the LogglyHandler'
+            );
         }
 
-        // TODO check value for false
         $this->licenseKey = ini_get('newrelic.license');
+        if (false == $this->licenseKey) {
+            $this->licenseKey = "NO_LICENSE_KEY_FOUND";
+        }
 
         parent::__construct($level, $bubble);
     }
 
+    public function setLicenseKey($key)
+    {
+        $this->licenseKey = $key;
+    }
+
+    public function setHost($host)
+    {
+        $this->host = $host;
+    }
+
     private function getCurlHandler()
     {
-        $url = sprintf("https://%s/%s", static::HOST, static::ENDPOINT);
+        $url = sprintf("https://%s/%s", $this->host, $this->endpoint);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -56,25 +71,37 @@ class Handler extends AbstractProcessingHandler
         return $ch;
     }
 
-    protected function write(array $record): void
+    protected function write(array $record)
     {
-        $this->send($this->getFormatter()->format($record));
+        $this->send($record["formatted"]);
     }
 
-    // TODO Not quite supported yet.  Can alter the Formatter to allow
-    // BATCH_MODE_JSON and adhere to the NR Log api for batching
-    public function handleBatch(array $records): void
+    public function handleBatch(array $records)
     {
         $level = $this->level;
         $records = array_filter($records, function ($record) use ($level) {
             return ($record['level'] >= $level);
         });
         if ($records) {
-            $this->send($this->getFormatter()->formatBatch($records));
+            $this->sendBatch($this->getFormatter()->formatBatch($records));
         }
     }
 
-    protected function send(string $data): void
+    protected function sendBatch($data)
+    {
+        $ch = $this->getCurlHandler();
+
+        $headers = ['Content-Type: application/json',
+                    'X-License-Key: ' . $this->licenseKey];
+
+        $postData = '[{"logs":' . $data . '}]';
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        Curl\Util::execute($ch, 5, false);
+    }
+
+    protected function send($data)
     {
         $ch = $this->getCurlHandler();
 
@@ -86,8 +113,19 @@ class Handler extends AbstractProcessingHandler
         Curl\Util::execute($ch, 5, false);
     }
 
-    protected function getDefaultFormatter(): FormatterInterface
+    public function setFormatter(FormatterInterface $formatter)
     {
-        return new Formatter();
+        if ($formatter instanceof Formatter) {
+            return parent::setFormatter($formatter);
+        }
+        $fq = 'NewRelic\Monolog\Enricher\Handler'
+        throw new \InvalidArgumentException(
+            $fq . ' is only compatible with ' . $fq
+        );
+    }
+
+    protected function getDefaultFormatter()
+    {
+        return new Formatter(Formatter::BATCH_MODE_JSON, false);
     }
 }

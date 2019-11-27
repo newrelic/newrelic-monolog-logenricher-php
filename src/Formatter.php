@@ -29,8 +29,10 @@ class Formatter extends JsonFormatter
      * @param int $batchMode
      * @param bool $appendNewline
      */
-    public function __construct($batchMode = SELF::BATCH_MODE_NEWLINES, $appendNewline = true)
-    {
+    public function __construct(
+        $batchMode = self::BATCH_MODE_NEWLINES,
+        $appendNewline = true
+    ) {
         // BATCH_MODE_NEWLINES is required for batch compatibility with New
         // Relic log forwarder plugins, which handle batching records. When
         // using the New Relic Monolog handler along side a batching handler
