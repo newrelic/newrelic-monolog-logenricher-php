@@ -4,12 +4,9 @@
  * Copyright [2019] New Relic Corporation. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
- * This file contains the Formatter class for the New Relic Monolog Enricher.
- * This class formats a Monolog record as a JSON object with a compatible
- * timestamp, and any New Relic context information moved to the top-level.
- * The resulting output is intended to be sent to New Relic Logs via a
- * compatible log forwarder with New Relic plugin installed (see this
- * project's README for links to available plugins).
+ * This file contains the abstract parent of the Formatter class for
+ * the New Relic Monolog Enricher. This class implements all functionality
+ * that is compatible with all Monolog API versions
  *
  * @author New Relic PHP <php-agent@newrelic.com>
  */
@@ -23,7 +20,7 @@ use Monolog\Logger;
  * Formats record as a JSON object with transformations necessary for
  * ingestion by New Relic Logs
  */
-class Formatter extends JsonFormatter
+abstract class AbstractFormatter extends JsonFormatter
 {
     /**
      * @param int $batchMode
@@ -65,19 +62,12 @@ class Formatter extends JsonFormatter
         }
         return parent::normalize($data, $depth);
     }
-
-    /**
-     * Normalizes each record individually before JSON encoding the complete
-     * batch of records as a JSON array.
-     *
-     * @param array $records
-     * @return string
-     */
-    protected function formatBatchJson(array $records)
-    {
-        foreach ($records as $key => $record) {
-            $records[$key] = $this->normalize($record);
-        }
-        return $this->toJson($records, true);
-    }
 }
+
+// phpcs:disable
+if (Logger::API == 2) {
+    require_once dirname(__FILE__) . '/api2/Formatter.php';
+} else {
+    require_once dirname(__FILE__) . '/api1/Formatter.php';
+}
+// phpcs:enable

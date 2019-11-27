@@ -12,8 +12,8 @@
 
 namespace NewRelic\Monolog\Enricher;
 
-use Monolog\Logger;
 use PHPUnit_Framework_TestCase;
+use Monolog\Logger;
 
 class FormatterTest extends PHPUnit_Framework_TestCase
 {
