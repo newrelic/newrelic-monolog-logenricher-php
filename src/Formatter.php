@@ -26,14 +26,17 @@ use Monolog\Logger;
 class Formatter extends JsonFormatter
 {
     /**
+     * @param int $batchMode
      * @param bool $appendNewline
      */
-    public function __construct($appendNewline = true)
+    public function __construct($batchMode = SELF::BATCH_MODE_NEWLINES, $appendNewline = true)
     {
-        // BATCH_MODE_NEWLINES is required for compatibility with New Relic
-        // log forwarder plugins, which handle batching records in accordance
-        // with the New Relic Logging API
-        parent::__construct(self::BATCH_MODE_NEWLINES, $appendNewline);
+        // BATCH_MODE_NEWLINES is required for batch compatibility with New
+        // Relic log forwarder plugins, which handle batching records. When
+        // using the New Relic Monolog handler along side a batching handler
+        // such as the BufferHandler, BATCH_MODE_JSON is required to adhere
+        // to the New Relic logs API bulk ingest format.
+        parent::__construct($batchMode, $appendNewline);
     }
 
 
@@ -59,5 +62,20 @@ class Formatter extends JsonFormatter
             );
         }
         return parent::normalize($data, $depth);
+    }
+
+    /**
+     * Normalizes each record individually before JSON encoding the complete
+     * batch of records as a JSON array.
+     *
+     * @param array $records
+     * @return string
+     */
+    protected function formatBatchJson(array $records)
+    {
+        foreach ($records as $key => $record) {
+            $records[$key] = $this->normalize($record);
+        }
+        return $this->toJson($records, true);
     }
 }
