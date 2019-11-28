@@ -98,8 +98,10 @@ abstract class AbstractHandler extends AbstractProcessingHandler
     {
         $ch = $this->getCurlHandler();
 
-        $headers = array('Content-Type: application/json',
-                    'X-License-Key: ' . $this->licenseKey);
+        $headers = array(
+            'Content-Type: application/json',
+            'X-License-Key: ' . $this->licenseKey
+        );
 
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
