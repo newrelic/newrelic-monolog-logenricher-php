@@ -53,7 +53,7 @@ abstract class AbstractHandler extends AbstractProcessingHandler
      * Sets the New Relic license key. Defaults to the New Relic INI's
      * value for 'newrelic.license' if available.
      *
-     * @param  string    $host
+     * @param  string    $key
      */
     public function setLicenseKey($key)
     {
