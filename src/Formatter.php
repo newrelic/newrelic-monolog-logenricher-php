@@ -4,12 +4,9 @@
  * Copyright [2019] New Relic Corporation. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
- * This file contains the Formatter class for the New Relic Monolog Enricher.
- * This class formats a Monolog record as a JSON object with a compatible
- * timestamp, and any New Relic context information moved to the top-level.
- * The resulting output is intended to be sent to New Relic Logs via a
- * compatible log forwarder with New Relic plugin installed (see this
- * project's README for links to available plugins).
+ * This file contains the abstract parent of the Formatter class for
+ * the New Relic Monolog Enricher. This class implements all functionality
+ * that is compatible with all Monolog API versions
  *
  * @author New Relic PHP <php-agent@newrelic.com>
  */
@@ -23,17 +20,22 @@ use Monolog\Logger;
  * Formats record as a JSON object with transformations necessary for
  * ingestion by New Relic Logs
  */
-class Formatter extends JsonFormatter
+abstract class AbstractFormatter extends JsonFormatter
 {
     /**
+     * @param int $batchMode
      * @param bool $appendNewline
      */
-    public function __construct($appendNewline = true)
-    {
-        // BATCH_MODE_NEWLINES is required for compatibility with New Relic
-        // log forwarder plugins, which handle batching records in accordance
-        // with the New Relic Logging API
-        parent::__construct(self::BATCH_MODE_NEWLINES, $appendNewline);
+    public function __construct(
+        $batchMode = self::BATCH_MODE_NEWLINES,
+        $appendNewline = true
+    ) {
+        // BATCH_MODE_NEWLINES is required for batch compatibility with New
+        // Relic log forwarder plugins, which handle batching records. When
+        // using the New Relic Monolog handler along side a batching handler
+        // such as the BufferHandler, BATCH_MODE_JSON is required to adhere
+        // to the New Relic logs API bulk ingest format.
+        parent::__construct($batchMode, $appendNewline);
     }
 
 
@@ -61,3 +63,18 @@ class Formatter extends JsonFormatter
         return parent::normalize($data, $depth);
     }
 }
+
+// phpcs:disable
+/*
+ * This extension to the Monolog framework supports the same PHP versions
+ * as the New Relic PHP Agent (>=5.3).  Older versions of PHP are only
+ * compatible with Monolog v1, therefore, To accomodate Monolog v2's explicit
+ * and required type annotations, some overridden methods must be implemented
+ * both with compatible annotations for v2 and without for v1
+ */
+if (Logger::API == 2) {
+    require_once dirname(__FILE__) . '/api2/Formatter.php';
+} else {
+    require_once dirname(__FILE__) . '/api1/Formatter.php';
+}
+// phpcs:enable

@@ -12,7 +12,6 @@
 
 namespace NewRelic\Monolog\Enricher;
 
-use DateTime;
 use Monolog\Logger;
 use PHPUnit_Framework_TestCase;
 
@@ -35,7 +34,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
             'level_name' => 'WARNING',
             'channel' => 'test',
             'extra' => array(),
-            'datetime' => new DateTime(),
+            'datetime' => new \DateTime("now", new \DateTimeZone("UTC")),
         );
 
         if ($withNrContext) {
@@ -95,10 +94,11 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         );
         $this->assertEquals(true, $formatter->isAppendingNewlines());
 
-        // Verify that trailing newlines can be disabled
-        $formatter = new Formatter(false);
+        // Verify that batch mode can be set, and trailing newlines can
+        // be disabled
+        $formatter = new Formatter(Formatter::BATCH_MODE_JSON, false);
         $this->assertEquals(
-            Formatter::BATCH_MODE_NEWLINES,
+            Formatter::BATCH_MODE_JSON,
             $formatter->getBatchMode()
         );
         $this->assertEquals(false, $formatter->isAppendingNewlines());
@@ -119,7 +119,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         );
 
         // Test without trailing newline
-        $formatter = new Formatter(false);
+        $formatter = new Formatter(Formatter::BATCH_MODE_NEWLINES, false);
         $this->assertEquals(
             $this->getExpectedForRecord($record, false),
             $formatter->format($record)
@@ -135,11 +135,26 @@ class FormatterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Tests that batch records are output as individual newline-delimted JSON
-     * objects
+     * Tests that batch records are processed correctly according to
+     * $batchMode parameter
      */
     public function testFormatBatch()
     {
+        $formatter = new Formatter(Formatter::BATCH_MODE_JSON, false);
+        // One record with New Relic context information, one without
+        $records = array(
+            $this->getRecord(true),
+            $this->getRecord(false),
+        );
+
+        $this->assertEquals(
+            // Test records when batch processed as a JSON array.
+            '[' . $this->getExpectedForRecord($records[0], false) . ','
+            . $this->getExpectedForRecord($records[1], false) . ']',
+            $formatter->formatBatch($records)
+        );
+
+
         $formatter = new Formatter();
         // One record with New Relic context information, one without
         $records = array(
