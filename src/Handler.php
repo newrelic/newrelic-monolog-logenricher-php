@@ -13,11 +13,12 @@
 
 namespace NewRelic\Monolog\Enricher;
 
+use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\Curl;
 use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Logger;
-use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\MissingExtensionException;
+use Monolog\Logger;
 use Monolog\Util;
 
 abstract class AbstractHandler extends AbstractProcessingHandler

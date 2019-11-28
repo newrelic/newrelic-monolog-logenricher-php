@@ -15,11 +15,11 @@
 
 namespace NewRelic\Monolog\Enricher;
 
-use Monolog\Handler\Curl;
-use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Logger;
 use Monolog\Formatter\FormatterInterface;
+use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Handler\Curl;
 use Monolog\Handler\HandlerInterface;
+use Monolog\Logger;
 use Monolog\Util;
 
 class Handler extends AbstractHandler
