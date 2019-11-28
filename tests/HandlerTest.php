@@ -54,7 +54,7 @@ class HandlerTest extends PHPUnit_Framework_TestCase
         $expected = $formatter->formatBatch(array($record));
         $this->expectOutputString($expected);
         $handler = new StubHandler();
-        $handler->handleBatch([$record]);
+        $handler->handleBatch(array($record));
     }
 
     public function testSetFormatter()
