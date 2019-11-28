@@ -157,8 +157,8 @@ abstract class AbstractHandler extends AbstractProcessingHandler
         if (preg_match('/^(.+?)x/', $licenseKey, $matches)) {
             $region = substr($matches[1], 0, 2);
         } else {
-            // US licence keys generally don't include region identifiers, so we'll
-            // default to that.
+            // US licence keys generally don't include region identifiers, so
+            // we'll default to that.
             $region = 'us';
         }
 
