@@ -36,7 +36,7 @@ abstract class AbstractHandler extends AbstractProcessingHandler
     {
         if (!extension_loaded('curl')) {
             throw new MissingExtensionException(
-                'The curl extension is needed to use the LogglyHandler'
+                'The curl extension is required to use this Handler'
             );
         }
 
@@ -77,7 +77,7 @@ abstract class AbstractHandler extends AbstractProcessingHandler
      *
      * @return  resource    $ch             curl handler
      */
-    private function getCurlHandler()
+    protected function getCurlHandler()
     {
         $url = sprintf("https://%s/%s", $this->host, $this->endpoint);
         $ch = curl_init();
