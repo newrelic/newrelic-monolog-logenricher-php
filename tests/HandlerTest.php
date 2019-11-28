@@ -104,12 +104,117 @@ class HandlerTest extends PHPUnit_Framework_TestCase
         $handler = new Handler();
         $GLOBALS['extension_loaded'] = true;
     }
+
+    public function testCurlHandlerExplicitHost()
+    {
+        $handler = new StubHandler();
+        $handler->setHost('foo.bar');
+
+        $ch = $handler->getCurlHandler();
+
+        $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+        $parts = parse_url($url);
+
+        $this->assertSame('https', $parts['scheme']);
+        $this->assertSame('foo.bar', $parts['host']);
+        $this->assertSame($handler->getEndpoint(), substr($parts['path'], 1));
+    }
+
+    /**
+     * @dataProvider defaultHostProvider
+     */
+    public function testCurlHandlerDefault($key, $expected)
+    {
+        $handler = new StubHandler();
+        $handler->setLicenseKey($key);
+
+        $ch = $handler->getCurlHandler();
+
+        $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+        $parts = parse_url($url);
+
+        $this->assertSame('https', $parts['scheme']);
+        $this->assertSame($expected, $parts['host']);
+        $this->assertSame($handler->getEndpoint(), substr($parts['path'], 1));
+    }
+
+    /**
+     * @dataProvider defaultHostExceptionProvider
+     */
+    public function testCurlHandlerDefaultException($key, $expectedException)
+    {
+        $this->setExpectedException($expectedException);
+
+        $handler = new StubHandler();
+        $handler->setLicenseKey($key);
+        $handler->getCurlHandler();
+    }
+
+    /**
+     * @dataProvider defaultHostProvider
+     */
+    public function testDefaultHost($key, $expected)
+    {
+        $this->assertSame($expected, StubHandler::getDefaultHost($key));
+    }
+
+    /**
+     * @dataProvider defaultHostExceptionProvider
+     */
+    public function testDefaultHostException($key, $expectedException)
+    {
+        $this->setExpectedException($expectedException);
+        StubHandler::getDefaultHost($key);
+    }
+
+    public function defaultHostProvider()
+    {
+        return array(
+            'normal eu key' => array(
+                'eu01xx0000000000000000000000000000000000',
+                'log-api.eu.newrelic.com',
+            ),
+            'normal us key' => array(
+                '0000000000000000000000000000000000000000',
+                'log-api.newrelic.com',
+            ),
+            'malformed key without a region identifier' => array(
+                'x000000000000000000000000000000000000000',
+                'log-api.newrelic.com',
+            ),
+            'empty key' => array(
+                '',
+                'log-api.newrelic.com',
+            ),
+        );
+    }
+
+    public function defaultHostExceptionProvider()
+    {
+        return array(
+            'malformed key with a region identifier' => array(
+                '0x00000000000000000000000000000000000000',
+                'NewRelic\Monolog\Enricher\UnknownRegionException',
+            ),
+            'non-string key' => array(
+                array(),
+                'InvalidArgumentException',
+            ),
+            'null key' => array(
+                null,
+                'InvalidArgumentException',
+            ),
+        );
+    }
 }
 
 // phpcs:disable
 /**
  * Stubhandler overrides the methods of Handler that normally call
- * curl_exec, and instead outputs the data they receive
+ * curl_exec, and instead outputs the data they receive.
+ *
+ * It also exports a couple of normally protected methods as public for
+ * easier testing.
  */
 class StubHandler extends Handler {
     protected function send($data)
@@ -120,6 +225,21 @@ class StubHandler extends Handler {
     protected function sendBatch($data)
     {
         print($data);
+    }
+
+    public function getCurlHandler()
+    {
+        return parent::getCurlHandler();
+    }
+
+    public function getEndpoint()
+    {
+        return $this->endpoint;
+    }
+
+    static public function getDefaultHost($licenseKey)
+    {
+        return parent::getDefaultHost($licenseKey);
     }
 }
 
