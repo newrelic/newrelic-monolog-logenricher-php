@@ -12,16 +12,15 @@
 
 namespace NewRelic\Monolog\Enricher;
 
-use PHPUnit_Framework_TestCase;
 use Monolog\Formatter\NormalizerFormatter;
+use Monolog\Handler\MissingExtensionException;
 use Monolog\Logger;
+use PHPUnit_Framework_TestCase;
 
 class HandlerTest extends PHPUnit_Framework_TestCase
 {
     public function testHandle()
     {
-        // log message
-
         $record = array(
             'message' => 'test',
             'context' => array(),
@@ -33,17 +32,29 @@ class HandlerTest extends PHPUnit_Framework_TestCase
         );
 
         $formatter = new Formatter(Formatter::BATCH_MODE_JSON, false);
-        $data = $formatter->format($record);
-
-        $expected = array();
-
-
-        // perform tests
-        /*
-        $handler = new Handler();
+        $expected = $formatter->format($record);
+        $this->expectOutputString($expected);
+        $handler = new StubHandler();
         $handler->handle($record);
-        $handler->handleBatch([$msg]);
-         */
+    }
+
+    public function testHandleBatch()
+    {
+        $record = array(
+            'message' => 'test',
+            'context' => array(),
+            'level' => 300,
+            'level_name' => 'WARNING',
+            'channel' => 'test',
+            'extra' => array(),
+            'datetime' => new \DateTime("now", new \DateTimeZone("UTC")),
+        );
+
+        $formatter = new Formatter(Formatter::BATCH_MODE_JSON, false);
+        $expected = $formatter->formatBatch(array($record));
+        $this->expectOutputString($expected);
+        $handler = new StubHandler();
+        $handler->handleBatch([$record]);
     }
 
     public function testSetFormatter()
@@ -81,4 +92,47 @@ class HandlerTest extends PHPUnit_Framework_TestCase
 
         $handler->setFormatter($formatter);
     }
+
+    public function testMissingCurlExtension()
+    {
+        $this->setExpectedException(
+            'Monolog\Handler\MissingExtensionException',
+            'The curl extension is required to use this Handler'
+        );
+        
+        $GLOBALS['extension_loaded'] = false;
+        $handler = new Handler();
+        $GLOBALS['extension_loaded'] = true;
+    }
 }
+
+// phpcs:disable
+/**
+ * Stubhandler overrides the methods of Handler that normally call
+ * curl_exec, and instead outputs the data they receive
+ */
+class StubHandler extends Handler {
+    protected function send($data)
+    {
+        print($data);
+    }
+
+    protected function sendBatch($data)
+    {
+        print($data);
+    }
+}
+
+/**
+ * Mocks global function extension_loaded to return the value
+ * of global variable $extension_loaded
+ */
+function extension_loaded($extension)
+{
+    return $GLOBALS['extension_loaded'];
+}
+
+// Used to manually set the value returned by the mocked extension_loaded()
+$extension_loaded = true;
+
+// phpcs:enable
