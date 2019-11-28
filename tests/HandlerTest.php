@@ -18,10 +18,6 @@ use Monolog\Logger;
 
 class HandlerTest extends PHPUnit_Framework_TestCase
 {
-
-    protected $fq_name = 'NewRelic\Monolog\Enricher\Handler';
-
-
     public function testHandle()
     {
         // log message
@@ -79,7 +75,8 @@ class HandlerTest extends PHPUnit_Framework_TestCase
 
         $this->setExpectedException(
             'InvalidArgumentException',
-            $this->fq_name . ' is only compatible with ' . $this->fq_name
+            'NewRelic\Monolog\Enricher\Handler is only compatible with '
+            . 'NewRelic\Monolog\Enricher\Formatter'
         );
 
         $handler->setFormatter($formatter);

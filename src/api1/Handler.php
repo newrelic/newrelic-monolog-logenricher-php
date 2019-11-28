@@ -67,9 +67,9 @@ class Handler extends AbstractHandler
         if ($formatter instanceof Formatter) {
             return parent::setFormatter($formatter);
         }
-        $fq = 'NewRelic\Monolog\Enricher\Handler';
         throw new \InvalidArgumentException(
-            $fq . ' is only compatible with ' . $fq
+            'NewRelic\Monolog\Enricher\Handler is only compatible with '
+            . 'NewRelic\Monolog\Enricher\Formatter'
         );
     }
 

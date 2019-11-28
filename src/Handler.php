@@ -41,7 +41,7 @@ abstract class AbstractHandler extends AbstractProcessingHandler
         }
 
         $this->licenseKey = ini_get('newrelic.license');
-        if (false == $this->licenseKey) {
+        if (!$this->licenseKey) {
             $this->licenseKey = "NO_LICENSE_KEY_FOUND";
         }
 
@@ -117,8 +117,10 @@ abstract class AbstractHandler extends AbstractProcessingHandler
     {
         $ch = $this->getCurlHandler();
 
-        $headers = array('Content-Type: application/json',
-                    'X-License-Key: ' . $this->licenseKey);
+        $headers = array(
+            'Content-Type: application/json',
+            'X-License-Key: ' . $this->licenseKey
+        );
 
         $postData = '[{"logs":' . $data . '}]';
 
@@ -129,6 +131,13 @@ abstract class AbstractHandler extends AbstractProcessingHandler
 }
 
 // phpcs:disable
+/*
+ * This extension to the Monolog framework supports the same PHP versions
+ * as the New Relic PHP Agent (>=5.3).  Older versions of PHP are only
+ * compatible with Monolog v1, therefore, To accomodate Monolog v2's explicit
+ * and required type annotations, some overridden methods must be implemented
+ * both with compatible annotations for v2 and without for v1
+ */
 if (Logger::API == 2) {
     require_once dirname(__FILE__) . '/api2/Handler.php';
 } else {
