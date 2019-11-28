@@ -23,7 +23,7 @@ use Monolog\Util;
 
 abstract class AbstractHandler extends AbstractProcessingHandler
 {
-    protected $host = 'log-api.newrelic.com';
+    protected $host = null;
     protected $endpoint = 'log/v1';
     protected $licenseKey;
 
@@ -80,7 +80,11 @@ abstract class AbstractHandler extends AbstractProcessingHandler
      */
     protected function getCurlHandler()
     {
-        $url = sprintf("https://%s/%s", $this->host, $this->endpoint);
+        $host = is_null($this->host)
+              ? self::getDefaultHost($this->licenseKey)
+              : $this->host;
+
+        $url = "https://{$host}/{$this->endpoint}";
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -130,6 +134,44 @@ abstract class AbstractHandler extends AbstractProcessingHandler
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         Curl\Util::execute($ch, 5, false);
+    }
+
+    /**
+     * Given a licence key, returns the default log API host for that region.
+     *
+     * @param string $licenseKey
+     * @return string
+     * @throws UnknownRegionException Thrown if the licence key includes a
+     *                                region that does not correspond to a
+     *                                known Log API host.
+     */
+    protected static function getDefaultHost($licenseKey)
+    {
+        if (!is_string($licenseKey)) {
+            throw new \InvalidArgumentException(
+                'Unknown license key of type ' . gettype($licenseKey)
+            );
+        }
+
+        $matches = array();
+        if (preg_match('/^(.+?)x/', $licenseKey, $matches)) {
+            $region = substr($matches[1], 0, 2);
+        } else {
+            // US licence keys generally don't include region identifiers, so we'll
+            // default to that.
+            $region = 'us';
+        }
+
+        switch ($region) {
+            case 'eu':
+                return 'log-api.eu.newrelic.com';
+
+            case 'us':
+                return 'log-api.newrelic.com';
+
+            default:
+                throw new UnknownRegionException($region);
+        }
     }
 }
 
