@@ -30,7 +30,7 @@ Alternatively, you can use `phpcbf` to automatically fix most errors:
 composer coding-standard-fix
 ```
 
-### Running tests
+### Running unit tests
 
 This project uses [PHPUnit 4](https://phpunit.de/manual/4.8/en/index.html),
 which is the last PHPUnit version to support PHP 5.3.
@@ -49,3 +49,15 @@ composer test-coverage
 ```
 
 This will write a HTML coverage report to `coverage/index.html`.
+
+### Running integration tests
+
+It's also possible to run a suite of integration tests against both Monolog 1
+and 2 via Composer:
+
+```bash
+composer integration
+```
+
+More information on these tests is available in the
+[`tests/integration` README](tests/integration/README.md).

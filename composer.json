@@ -32,6 +32,13 @@
         ],
         "coding-standard-check": "phpcs -p",
         "coding-standard-fix": "phpcbf",
+        "integration": [
+            "@composer install -d tests/integration/server",
+            "@composer install -d tests/integration/v1",
+            "@composer install -d tests/integration/v2",
+            "cd tests/integration/v1 && php -d error_reporting=24575 vendor/bin/phpunit",
+            "cd tests/integration/v2 && php -d error_reporting=24575 vendor/bin/phpunit"
+        ],
         "test": "php -d error_reporting=24575 vendor/bin/phpunit",
         "test-coverage": [
             "rm -rf coverage",

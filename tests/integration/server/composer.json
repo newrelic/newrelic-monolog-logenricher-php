@@ -1,0 +1,7 @@
+{
+    "require": {
+        "react/http": "^0.8.5",
+        "nikic/fast-route": "^1.3",
+        "php": ">=5.4.0"
+    }
+}
