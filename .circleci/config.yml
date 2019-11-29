@@ -228,6 +228,71 @@ jobs:
 
     steps: *test_steps
 
+  integration:
+    docker:
+      - image: circleci/php:7-cli
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-integration-dependencies-{{ checksum "composer.json" }}
+            - v1-integration-dependencies-
+
+      - run: composer install -n --prefer-dist
+
+      - save_cache:
+          key: v1-integration-dependencies-{{ checksum "composer.json" }}
+          paths:
+            - ./vendor
+
+      - restore_cache:
+          keys:
+            - v1-integration-server-{{ checksum "tests/integration/server/composer.lock" }}
+            - v1-integration-server-
+
+      - run: composer install -d tests/integration/server --prefer-dist
+
+      - save_cache:
+          key: v1-integration-server-{{ checksum "tests/integration/server/composer.lock" }}
+          paths:
+            - ./tests/integration/server/vendor
+
+      - restore_cache:
+          keys:
+            - v1-integration-v1-{{ checksum "tests/integration/v1/composer.lock" }}
+            - v1-integration-v1-
+
+      - run: composer install -d tests/integration/v1 --prefer-dist
+
+      - save_cache:
+          key: v1-integration-v1-{{ checksum "tests/integration/v1/composer.lock" }}
+          paths:
+            - ./tests/integration/v1/vendor
+
+      - restore_cache:
+          keys:
+            - v1-integration-v2-{{ checksum "tests/integration/v2/composer.lock" }}
+            - v1-integration-v2-
+
+      - run: composer install -d tests/integration/v2 --prefer-dist
+
+      - save_cache:
+          key: v1-integration-v2-{{ checksum "tests/integration/v2/composer.lock" }}
+          paths:
+            - ./tests/integration/v2/vendor
+
+      - run:
+          command: php -d error_reporting=24575 vendor/bin/phpunit
+          name: Monolog 1 integration tests
+          working_directory: tests/integration/v1
+
+      - run:
+          command: php -d error_reporting=24575 vendor/bin/phpunit
+          name: Monolog 2 integration tests
+          working_directory: tests/integration/v2
+
 workflows:
   version: 2
   test:
@@ -258,5 +323,8 @@ workflows:
           requires:
             - coding_standard
       - "php-7.4":
+          requires:
+            - coding_standard
+      - integration:
           requires:
             - coding_standard
