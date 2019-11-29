@@ -4,9 +4,8 @@
  * Copyright [2019] New Relic Corporation. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
- * This file contains the abstract parent of the Handler class for
- * the New Relic Monolog Enricher. This class implements all functionality
- * that is compatible with all Monolog API versions
+ * This file contains the exception thrown when an unknown region identifer is
+ * found.
  *
  * @author New Relic PHP <php-agent@newrelic.com>
  */
