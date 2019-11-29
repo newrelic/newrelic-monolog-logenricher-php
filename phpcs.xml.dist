@@ -2,6 +2,7 @@
 <ruleset name="newrelic/monolog-enricher">
     <file>./src</file>
     <file>./tests</file>
+    <exclude-pattern>./tests/integration/*/vendor</exclude-pattern>
 
     <rule ref="PSR12"/>
 

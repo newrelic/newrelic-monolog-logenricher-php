@@ -85,7 +85,7 @@ abstract class AbstractHandler extends AbstractProcessingHandler
               ? self::getDefaultHost($this->licenseKey)
               : $this->host;
 
-        $url = "{$this->protocol}://{$host}/{$this->endpoint}";
+        $url = "{$this->protocol}{$host}/{$this->endpoint}";
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
