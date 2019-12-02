@@ -141,9 +141,6 @@ abstract class AbstractHandler extends AbstractProcessingHandler
      *
      * @param string $licenseKey
      * @return string
-     * @throws UnknownRegionException Thrown if the licence key includes a
-     *                                region that does not correspond to a
-     *                                known Log API host.
      */
     protected static function getDefaultHost($licenseKey)
     {
@@ -154,24 +151,15 @@ abstract class AbstractHandler extends AbstractProcessingHandler
         }
 
         $matches = array();
-        if (preg_match('/^(.+?)x/', $licenseKey, $matches)) {
-            $region = substr($matches[1], 0, 2);
+        if (preg_match('/^([a-z]{2,3})[0-9]{2}x/', $licenseKey, $matches)) {
+            $region = ".{$matches[1]}";
         } else {
             // US licence keys generally don't include region identifiers, so
             // we'll default to that.
-            $region = 'us';
+            $region = '';
         }
 
-        switch ($region) {
-            case 'eu':
-                return 'log-api.eu.newrelic.com';
-
-            case 'us':
-                return 'log-api.newrelic.com';
-
-            default:
-                throw new UnknownRegionException($region);
-        }
+        return "log-api$region.newrelic.com";
     }
 }
 
