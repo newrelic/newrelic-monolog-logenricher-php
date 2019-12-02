@@ -182,6 +182,14 @@ class HandlerTest extends PHPUnit_Framework_TestCase
                 'x000000000000000000000000000000000000000',
                 'log-api.newrelic.com',
             ),
+            'key with a region identifier that is too long' => array(
+                'abcd00x000000000000000000000000000000000',
+                'log-api.newrelic.com',
+            ),
+            'key with a region identifier that is too short' => array(
+                'a00x000000000000000000000000000000000000',
+                'log-api.newrelic.com',
+            ),
             'empty key' => array(
                 '',
                 'log-api.newrelic.com',
@@ -192,10 +200,6 @@ class HandlerTest extends PHPUnit_Framework_TestCase
     public function defaultHostExceptionProvider()
     {
         return array(
-            'malformed key with a region identifier' => array(
-                '0x00000000000000000000000000000000000000',
-                'NewRelic\Monolog\Enricher\UnknownRegionException',
-            ),
             'non-string key' => array(
                 array(),
                 'InvalidArgumentException',
