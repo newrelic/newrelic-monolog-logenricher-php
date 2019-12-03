@@ -37,7 +37,7 @@ Three components are provided:
    [New Relic PHP agent](https://docs.newrelic.com/docs/agents/php-agent) to
    decorate log records with
    [linking metadata](https://docs.newrelic.com/docs/agents/php-agent/php-agent-api/newrelicgetlinkingmetadata),
-   which allows you use
+   which allows you to use
    [logs-in-context](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs-context/enable-logs-context-apm-agents)
    to correlate log records with related data across the New Relic platform.
 
