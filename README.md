@@ -47,7 +47,8 @@ Three components are provided:
    [`JsonFormatter`](https://github.com/Seldaek/monolog/blob/master/src/Monolog/Formatter/JsonFormatter.php)
    provided by Monolog to take the decorated log records from the `Processor`
    and output them with the
-   [simplified JSON body structure expected by New Relic Logs](https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api#json-content).
+   [simplified JSON body structure expected by New Relic Logs](https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api#json-content)
+   and [its supported plugins](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs/enable-new-relic-logs#enable-logs).
 
 Please see the [examples](#examples) section below for more detail on how to
 integrate these components with your application.
