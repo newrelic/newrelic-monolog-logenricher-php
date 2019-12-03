@@ -127,7 +127,8 @@ $log->pushHandler(new Handler(Logger::WARNING));
 
 ### Buffering log records to improve performance
 
-to use Monolog's built-in
+Another way of avoiding a HTTP request for each log message that is sent is to
+use Monolog's built-in
 [`BufferHandler`](https://github.com/Seldaek/monolog/blob/master/src/Monolog/Handler/BufferHandler.php)
 to batch log messages, and then send them in one message at the end of the
 request:
