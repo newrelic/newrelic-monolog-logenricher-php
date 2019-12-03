@@ -1,5 +1,7 @@
 # Monolog components to enable New Relic logs
 
+[![Latest Stable Version](https://poser.pugx.org/newrelic/monolog-logenricher/version)](https://packagist.org/packages/newrelic/monolog-logenricher) [![Latest Unstable Version](https://poser.pugx.org/newrelic/monolog-logenricher/v/unstable)](//packagist.org/packages/newrelic/monolog-logenricher) [![CircleCI](https://circleci.com/gh/newrelic/newrelic-monolog-logenricher-php.svg?style=svg)](https://circleci.com/gh/newrelic/newrelic-monolog-logenricher-php) [![License](https://poser.pugx.org/newrelic/monolog-logenricher/license)](https://packagist.org/packages/newrelic/monolog-logenricher)
+
 This package provides the components required to integrate a PHP application
 using [Monolog](https://github.com/Seldaek/monolog) with
 [New Relic Logs](https://newrelic.com/products/logs).
