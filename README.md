@@ -13,7 +13,7 @@ using [Monolog](https://github.com/Seldaek/monolog) with
   * [Sending data directly to New Relic Logs](#sending-data-directly-to-new-relic-logs)
   * [Selectively sending log records](#selectively-sending-log-records)
   * [Buffering log records to improve performance](#buffering-log-records-to-improve-performance)
-  * [Manually specifying the license key and/or host](#manually-specifying-the-license-key-and-or-host)
+  * [Manually specifying the license key and/or host](#manually-specifying-the-license-key-andor-host)
   * [Integrating with an existing logging tool](#integrating-with-an-existing-logging-tool)
 * [Development](#development)
   * [Setting up a development environment](#setting-up-a-development-environment)
