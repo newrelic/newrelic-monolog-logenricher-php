@@ -1,6 +1,6 @@
 # Monolog components to enable New Relic logs
 
-[![Latest Stable Version](https://poser.pugx.org/newrelic/monolog-logenricher/version)](https://packagist.org/packages/newrelic/monolog-logenricher) [![Latest Unstable Version](https://poser.pugx.org/newrelic/monolog-logenricher/v/unstable)](//packagist.org/packages/newrelic/monolog-logenricher) [![CircleCI](https://circleci.com/gh/newrelic/newrelic-monolog-logenricher-php.svg?style=svg)](https://circleci.com/gh/newrelic/newrelic-monolog-logenricher-php) [![License](https://poser.pugx.org/newrelic/monolog-logenricher/license)](https://packagist.org/packages/newrelic/monolog-logenricher)
+[![Latest Stable Version](https://poser.pugx.org/newrelic/monolog-enricher/version)](https://packagist.org/packages/newrelic/monolog-enricher) [![Latest Unstable Version](https://poser.pugx.org/newrelic/monolog-enricher/v/unstable)](//packagist.org/packages/newrelic/monolog-enricher) [![CircleCI](https://circleci.com/gh/newrelic/newrelic-monolog-enricher-php.svg?style=svg)](https://circleci.com/gh/newrelic/newrelic-monolog-enricher-php) [![License](https://poser.pugx.org/newrelic/monolog-enricher/license)](https://packagist.org/packages/newrelic/monolog-enricher)
 
 This package provides the components required to integrate a PHP application
 using [Monolog](https://github.com/Seldaek/monolog) with
@@ -78,7 +78,7 @@ This package is available
 should be installed using [Composer](https://getcomposer.org):
 
 ```bash
-composer require newrelic/monolog-logenricher
+composer require newrelic/monolog-enricher
 ```
 
 ## Examples
