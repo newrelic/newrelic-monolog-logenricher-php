@@ -236,6 +236,9 @@ Alternatively, you can use `phpcbf` to automatically fix most errors:
 composer coding-standard-fix
 ```
 
+When submitting a fix, please also ensure a corresponding entry has been added
+to the [changelog](CHANGELOG.md).
+
 ### Running unit tests
 
 This project uses [PHPUnit 4](https://phpunit.de/manual/4.8/en/index.html),
