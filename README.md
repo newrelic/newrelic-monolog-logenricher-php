@@ -185,7 +185,7 @@ follows:
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use NewRelic\Monolog\Enricher\{Handler, Processor};
+use NewRelic\Monolog\Enricher\{Formatter, Processor};
 
 $log = new Logger('log');
 $log->pushProcessor(new Processor);
