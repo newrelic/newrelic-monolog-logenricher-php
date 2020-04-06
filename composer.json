@@ -21,7 +21,6 @@
         "ext-newrelic": "Adds support for viewing logs in context within the New Relic UI"
     },
     "autoload": {
-        "exclude-from-classmap": ["/src/api1/", "/src/api2"],
         "psr-4": {
             "NewRelic\\Monolog\\Enricher\\": "src"
         }
