@@ -37,7 +37,7 @@ Three components are provided:
    [simplified JSON body structure expected by New Relic Logs](https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api#json-content)
    and [its supported plugins](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs/enable-new-relic-logs#enable-logs).
 
-Please see [Getting Started](#getting started) below for more detail on how to integrate these components with your application.
+Please see [Getting Started](#getting-started) below for more detail on how to integrate these components with your application.
 
 ### Requirements
 
