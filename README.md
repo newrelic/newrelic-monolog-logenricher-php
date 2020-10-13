@@ -10,34 +10,6 @@ using [Monolog](https://github.com/Seldaek/monolog) with
 
 ## Installation
 
-### Requirements
-
-* [Monolog](https://github.com/Seldaek/monolog), version 1 or 2.
-* PHP 5.3.0 or later, although a
-  [currently supported version of PHP](https://php.net/supported-versions.php)
-  is strongly recommended.
-
-To use the `Handler`, you will also need the following:
-
-* PHP's [curl extension](https://php.net/curl).
-
-To enable
-[logs-in-context](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs-context/enable-logs-context-apm-agents)
-functionality, you will also need:
-
-* The [New Relic PHP agent](https://docs.newrelic.com/docs/agents/php-agent),
-  version 9.3 or later.
-
-### Install
-
-This package is available
-[on Packagist](https://packagist.org/packages/newrelic/monolog-enricher), and
-should be installed using [Composer](https://getcomposer.org):
-
-```bash
-composer require newrelic/monolog-enricher
-```
-
 ### Components
 
 Three components are provided:
@@ -65,7 +37,35 @@ Three components are provided:
    [simplified JSON body structure expected by New Relic Logs](https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api#json-content)
    and [its supported plugins](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs/enable-new-relic-logs#enable-logs).
 
-Please see the examples below for more detail on how to integrate these components with your application.
+Please see the [Getting Started](#getting started) below for more detail on how to integrate these components with your application.
+
+### Requirements
+
+* [Monolog](https://github.com/Seldaek/monolog), version 1 or 2.
+* PHP 5.3.0 or later, although a
+  [currently supported version of PHP](https://php.net/supported-versions.php)
+  is strongly recommended.
+
+To use the `Handler`, you will also need the following:
+
+* PHP's [curl extension](https://php.net/curl).
+
+To enable
+[logs-in-context](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs-context/enable-logs-context-apm-agents)
+functionality, you will also need:
+
+* The [New Relic PHP agent](https://docs.newrelic.com/docs/agents/php-agent),
+  version 9.3 or later.
+
+### Install
+
+This package is available
+[on Packagist](https://packagist.org/packages/newrelic/monolog-enricher), and
+should be installed using [Composer](https://getcomposer.org):
+
+```bash
+composer require newrelic/monolog-enricher
+```
 
 ## Getting Started
 
