@@ -8,24 +8,35 @@ This package provides the components required to integrate a PHP application
 using [Monolog](https://github.com/Seldaek/monolog) with
 [New Relic Logs](https://newrelic.com/products/logs).
 
-<!-- ## Contents
+## Installation
 
-* [Components](#components)
-* [Requirements](#requirements)
-* [Installation](#installation)
-* [Examples](#examples)
-  * [Sending data directly to New Relic Logs](#sending-data-directly-to-new-relic-logs)
-  * [Selectively sending log records](#selectively-sending-log-records)
-  * [Buffering log records to improve performance](#buffering-log-records-to-improve-performance)
-  * [Manually specifying the license key and/or host](#manually-specifying-the-license-key-andor-host)
-  * [Integrating with an existing logging tool](#integrating-with-an-existing-logging-tool)
-* [Development](#development)
-  * [Setting up a development environment](#setting-up-a-development-environment)
-  * [Coding standards](#coding-standards)
-  * [Running unit tests](#running-unit-tests)
-  * [Running integration tests](#running-integration-tests) -->
+### Requirements
 
-## Installation 
+* [Monolog](https://github.com/Seldaek/monolog), version 1 or 2.
+* PHP 5.3.0 or later, although a
+  [currently supported version of PHP](https://php.net/supported-versions.php)
+  is strongly recommended.
+
+To use the `Handler`, you will also need the following:
+
+* PHP's [curl extension](https://php.net/curl).
+
+To enable
+[logs-in-context](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs-context/enable-logs-context-apm-agents)
+functionality, you will also need:
+
+* The [New Relic PHP agent](https://docs.newrelic.com/docs/agents/php-agent),
+  version 9.3 or later.
+
+### Install
+
+This package is available
+[on Packagist](https://packagist.org/packages/newrelic/monolog-enricher), and
+should be installed using [Composer](https://getcomposer.org):
+
+```bash
+composer require newrelic/monolog-enricher
+```
 
 ### Components
 
@@ -54,36 +65,7 @@ Three components are provided:
    [simplified JSON body structure expected by New Relic Logs](https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api#json-content)
    and [its supported plugins](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs/enable-new-relic-logs#enable-logs).
 
-Please see the [examples](#examples) section below for more detail on how to
-integrate these components with your application.
-
-### Requirements
-
-* [Monolog](https://github.com/Seldaek/monolog), version 1 or 2.
-* PHP 5.3.0 or later, although a
-  [currently supported version of PHP](https://php.net/supported-versions.php)
-  is strongly recommended.
-
-To use the `Handler`, you will also need the following:
-
-* PHP's [curl extension](https://php.net/curl).
-
-To enable
-[logs-in-context](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs-context/enable-logs-context-apm-agents)
-functionality, you will also need:
-
-* The [New Relic PHP agent](https://docs.newrelic.com/docs/agents/php-agent),
-  version 9.3 or later.
-
-### Install with Bash
-
-This package is available
-[on Packagist](https://packagist.org/packages/newrelic/monolog-enricher), and
-should be installed using [Composer](https://getcomposer.org):
-
-```bash
-composer require newrelic/monolog-enricher
-```
+Please see the examples below for more detail on how to integrate these components with your application.
 
 ## Getting Started
 
@@ -113,8 +95,6 @@ to log records.
 
 If you do not use New Relic APM, you can skip pushing the processor: the
 `Handler` can operate independently.
-
-## Usage
 
 ### Selectively sending log records
 
