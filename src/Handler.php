@@ -22,7 +22,6 @@ use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 use Monolog\Util;
 
-if (Logger::API == 2) {
     class Handler extends AbstractHandler
     {
         /**
@@ -84,4 +83,3 @@ if (Logger::API == 2) {
             return new Formatter(Formatter::BATCH_MODE_JSON, false);
         }
     }
-}
