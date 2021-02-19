@@ -1,3 +1,5 @@
+[![Community Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Community_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#community-project)
+
 # Monolog components to enable New Relic logs
 
 [![Latest Stable Version](https://poser.pugx.org/newrelic/monolog-enricher/version)](https://packagist.org/packages/newrelic/monolog-enricher) [![Latest Unstable Version](https://poser.pugx.org/newrelic/monolog-enricher/v/unstable)](//packagist.org/packages/newrelic/monolog-enricher) [![CircleCI](https://circleci.com/gh/newrelic/newrelic-monolog-logenricher-php.svg?style=svg)](https://circleci.com/gh/newrelic/newrelic-monolog-logenricher-php) [![License](https://poser.pugx.org/newrelic/monolog-enricher/license)](https://packagist.org/packages/newrelic/monolog-enricher)
@@ -6,24 +8,9 @@ This package provides the components required to integrate a PHP application
 using [Monolog](https://github.com/Seldaek/monolog) with
 [New Relic Logs](https://newrelic.com/products/logs).
 
-## Contents
+## Installation
 
-* [Components](#components)
-* [Requirements](#requirements)
-* [Installation](#installation)
-* [Examples](#examples)
-  * [Sending data directly to New Relic Logs](#sending-data-directly-to-new-relic-logs)
-  * [Selectively sending log records](#selectively-sending-log-records)
-  * [Buffering log records to improve performance](#buffering-log-records-to-improve-performance)
-  * [Manually specifying the license key and/or host](#manually-specifying-the-license-key-andor-host)
-  * [Integrating with an existing logging tool](#integrating-with-an-existing-logging-tool)
-* [Development](#development)
-  * [Setting up a development environment](#setting-up-a-development-environment)
-  * [Coding standards](#coding-standards)
-  * [Running unit tests](#running-unit-tests)
-  * [Running integration tests](#running-integration-tests)
-
-## Components
+### Components
 
 Three components are provided:
 
@@ -50,10 +37,9 @@ Three components are provided:
    [simplified JSON body structure expected by New Relic Logs](https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api#json-content)
    and [its supported plugins](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs/enable-new-relic-logs#enable-logs).
 
-Please see the [examples](#examples) section below for more detail on how to
-integrate these components with your application.
+Please see [Getting Started](#getting-started) below for more detail on how to integrate these components with your application.
 
-## Requirements
+### Requirements
 
 * [Monolog](https://github.com/Seldaek/monolog), version 1 or 2.
 * PHP 5.3.0 or later, although a
@@ -71,7 +57,7 @@ functionality, you will also need:
 * The [New Relic PHP agent](https://docs.newrelic.com/docs/agents/php-agent),
   version 9.3 or later.
 
-## Installation
+### Install
 
 This package is available
 [on Packagist](https://packagist.org/packages/newrelic/monolog-enricher), and
@@ -81,7 +67,7 @@ should be installed using [Composer](https://getcomposer.org):
 composer require newrelic/monolog-enricher
 ```
 
-## Examples
+## Getting Started
 
 ### Sending logs directly to New Relic Logs
 
@@ -201,43 +187,7 @@ More information on configuring your logging tool to send logs to New Relic
 Logs can be found
 [within the New Relic documentation](https://docs.newrelic.com/docs/logs/new-relic-logs/enable-logs/enable-new-relic-logs).
 
-## Development
-
-If you would like to contribute to this project, please read the
-[CONTRIBUTING.md](CONTRIBUTING.md) and [code of conduct](CODE_OF_CONDUCT.md),
-along with the instructions below on our coding standards and running the test
-suites.
-
-### Setting up a development environment
-
-The development dependencies for this project are managed by Composer, and
-should be installed via Composer:
-
-```bash
-composer install
-```
-
-### Coding standards
-
-This project conforms to [PSR-12](https://www.php-fig.org/psr/psr-12/), with a
-soft line length limit of 80 characters.
-
-[PHP\_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) is used to
-ensure conformity. You can run `phpcs` to check the current code via the
-following Composer script:
-
-```bash
-composer coding-standard-check
-```
-
-Alternatively, you can use `phpcbf` to automatically fix most errors:
-
-```bash
-composer coding-standard-fix
-```
-
-When submitting a fix, please also ensure a corresponding entry has been added
-to the [changelog](CHANGELOG.md).
+## Testing
 
 ### Running unit tests
 
@@ -270,3 +220,76 @@ composer integration
 
 More information on these tests is available in the
 [`tests/integration` README](tests/integration/README.md).
+
+## Support
+
+Should you need assistance with New Relic products, you are in good hands with several support channels.
+
+If the issue has been confirmed as a bug or is a feature request, file a GitHub issue.
+
+**Support Channels**
+
+* [New Relic Documentation](https://docs.newrelic.com/docs/logs/enable-log-management-new-relic/logs-context-php/configure-logs-context-php): Comprehensive guidance for using our platform
+* [New Relic Community](https://discuss.newrelic.com/c/telemetry-data-platform/log-management): The best place to engage in troubleshooting questions
+* [New Relic Developer](https://developer.newrelic.com/): Resources for building a custom observability applications
+* [New Relic University](https://learn.newrelic.com/): A range of online training for New Relic users of every level
+
+
+## Privacy
+At New Relic we take your privacy and the security of your information seriously, and are committed to protecting your information. We must emphasize the importance of not sharing personal data in public forums, and ask all users to scrub logs and diagnostic information for sensitive information, whether personal, proprietary, or otherwise.
+
+We define “Personal Data” as any information relating to an identified or identifiable individual, including, for example, your name, phone number, post code or zip code, Device ID, IP address, and email address.
+
+For more information, review [New Relic’s General Data Privacy Notice](https://newrelic.com/termsandconditions/privacy).
+
+## Contribute
+
+We encourage your contributions to improve `newrelic-monolog-logenricher-php`! Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project.
+
+If you have any questions, or to execute our corporate CLA (which is required if your contribution is on behalf of a company), drop us an email at opensource@newrelic.com.
+
+**A note about vulnerabilities**
+
+As noted in our [security policy](../../security/policy), New Relic is committed to the privacy and security of our customers and their data. We believe that providing coordinated disclosure by security researchers and engaging with the security community are important means to achieve our security goals.
+
+If you believe you have found a security vulnerability in this project or any of New Relic's products or websites, we welcome and greatly appreciate you reporting it to New Relic through [HackerOne](https://hackerone.com/newrelic).
+
+If you would like to contribute to this project, review [these guidelines](./CONTRIBUTING.md).
+
+To [all contributors](https://github.com/newrelic/newrelic-monolog-logenricher-php/graphs/contributors), we thank you!  Without your contribution, this project would not be what it is today.  We also host a community project page dedicated to [Monolog for New Relic Logs](https://opensource.newrelic.com/projects/newrelic/newrelic-monolog-logenricher-php).
+
+### Setting up a development environment
+
+The development dependencies for this project are managed by Composer, and
+should be installed via Composer:
+
+```bash
+composer install
+```
+
+### Coding standards
+
+This project conforms to [PSR-12](https://www.php-fig.org/psr/psr-12/), with a
+soft line length limit of 80 characters.
+
+[PHP\_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) is used to
+ensure conformity. You can run `phpcs` to check the current code via the
+following Composer script:
+
+```bash
+composer coding-standard-check
+```
+
+Alternatively, you can use `phpcbf` to automatically fix most errors:
+
+```bash
+composer coding-standard-fix
+```
+
+When submitting a fix, please also ensure a corresponding entry has been added
+to the [changelog](CHANGELOG.md).
+
+## License
+`newrelic-monolog-logenricher-php` is licensed under the [Apache 2.0](http://apache.org/licenses/LICENSE-2.0.txt) License.
+
+
