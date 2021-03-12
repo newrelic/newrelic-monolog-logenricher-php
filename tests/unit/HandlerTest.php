@@ -99,7 +99,6 @@ class HandlerTest extends PHPUnit_Framework_TestCase
             'Monolog\Handler\MissingExtensionException',
             'The curl extension is required to use this Handler'
         );
- 
         $GLOBALS['extension_loaded'] = false;
         $handler = new Handler();
         $GLOBALS['extension_loaded'] = true;
