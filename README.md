@@ -42,7 +42,7 @@ Please see [Getting Started](#getting-started) below for more detail on how to i
 ### Requirements
 
 * [Monolog](https://github.com/Seldaek/monolog), version 1 or 2.
-* PHP 5.3.0 or later, although a
+* PHP 5.5.0 or later, although a
   [currently supported version of PHP](https://php.net/supported-versions.php)
   is strongly recommended.
 

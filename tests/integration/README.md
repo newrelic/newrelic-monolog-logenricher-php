@@ -5,8 +5,7 @@ These tests stand up and use a full `Logger` instance from either Monolog 1 or
 handler is sending data in the format expected by the
 [New Relic Log API](https://docs.newrelic.com/docs/logs/new-relic-logs/log-api/introduction-log-api).
 
-Note that, although this project in general supports PHP 5.3, the integration
-tests require PHP 5.4.
+Note that, similar to this project in general, the integration tests also support PHP 5.5 and above.
 
 ## Running the tests
 
