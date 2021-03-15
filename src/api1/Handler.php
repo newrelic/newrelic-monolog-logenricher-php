@@ -74,7 +74,6 @@ if (Logger::API == 1) {
             );
         }
 
-    
         /**
          * Returns a New Relic Formatter initialized with API compatible values
          *
