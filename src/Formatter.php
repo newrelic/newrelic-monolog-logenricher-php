@@ -4,77 +4,54 @@
  * Copyright [2019] New Relic Corporation. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
- * This file contains the abstract parent of the Formatter class for
- * the New Relic Monolog Enricher. This class implements all functionality
- * that is compatible with all Monolog API versions
+ * This file contains the Formatter class for the New Relic Monolog Enricher
+ * on Monolog API v2
+ *
+ * This class formats a Monolog record as a JSON object with a compatible
+ * timestamp, and any New Relic context information moved to the top-level.
+ * The resulting output is intended to be sent to New Relic Logs via a
+ * compatible log forwarder with New Relic plugin installed (see this
+ * project's README for links to available plugins).
  *
  * @author New Relic PHP <php-agent@newrelic.com>
  */
 
 namespace NewRelic\Monolog\Enricher;
 
-use Monolog\Formatter\JsonFormatter;
-use Monolog\Logger;
-
 /**
  * Formats record as a JSON object with transformations necessary for
  * ingestion by New Relic Logs
  */
-abstract class AbstractFormatter extends JsonFormatter
+class Formatter extends AbstractFormatter
 {
     /**
-     * @param int $batchMode
-     * @param bool $appendNewline
-     */
-    public function __construct(
-        $batchMode = self::BATCH_MODE_NEWLINES,
-        $appendNewline = true
-    ) {
-        // BATCH_MODE_NEWLINES is required for batch compatibility with New
-        // Relic log forwarder plugins, which handle batching records. When
-        // using the New Relic Monolog handler along side a batching handler
-        // such as the BufferHandler, BATCH_MODE_JSON is required to adhere
-        // to the New Relic logs API bulk ingest format.
-        parent::__construct($batchMode, $appendNewline);
-    }
-
-
-    /**
-     * Moves New Relic context information from the
-     * `$data['extra']['newrelic-context']` array to top level of record,
-     * converts `datetime` object to `timestamp` top level element represented
-     * as milliseconds since the UNIX epoch, and finally, normalizes the data
+     * Normalizes each record individually before JSON encoding the complete
+     * batch of records as a JSON array.
      *
-     * @param mixed $data
-     * @param int $depth
-     * @return mixed
+     * @param array $records
+     * @return string
      */
-    protected function normalize($data, $depth = 0)
+    protected function formatBatchJson(array $records): string
     {
-        if ($depth == 0) {
-            if (isset($data['extra']['newrelic-context'])) {
-                $data = array_merge($data, $data['extra']['newrelic-context']);
-                unset($data['extra']['newrelic-context']);
+        foreach ($records as $key => $record) {
+            $normalized = $this->normalize($record);
+
+            // Adhere to format of Monolog 2.x JSON format
+            if (
+                isset($normalized['context'])
+                && $normalized['context'] === []
+            ) {
+                $normalized['context'] = new \stdClass();
             }
-            $data['timestamp'] = intval(
-                $data['datetime']->format('U.u') * 1000
-            );
+            if (
+                isset($normalized['extra'])
+                && $normalized['extra'] === []
+            ) {
+                $normalized['extra'] = new \stdClass();
+            }
+
+            $records[$key] = $normalized;
         }
-        return parent::normalize($data, $depth);
+        return $this->toJson($records, true);
     }
 }
-
-// phpcs:disable
-/*
- * This extension to the Monolog framework supports the same PHP versions
- * as the New Relic PHP Agent (>=5.3).  Older versions of PHP are only
- * compatible with Monolog v1, therefore, To accomodate Monolog v2's explicit
- * and required type annotations, some overridden methods must be implemented
- * both with compatible annotations for v2 and without for v1
- */
-if (Logger::API == 2) {
-    require_once dirname(__FILE__) . '/api2/Formatter.php';
-} else {
-    require_once dirname(__FILE__) . '/api1/Formatter.php';
-}
-// phpcs:enable
