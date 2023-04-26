@@ -52,6 +52,9 @@ class Formatter extends AbstractFormatter
 
             $records[$key] = $normalized;
         }
+
+        $records = array_values($records);
+
         return $this->toJson($records, true);
     }
 }
