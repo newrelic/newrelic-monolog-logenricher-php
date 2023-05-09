@@ -11,8 +11,6 @@
 
 namespace NewRelic\Monolog\Enricher\IntegrationTest;
 
-use PHPUnit_Framework_TestCase;
-
 // phpcs:disable
 require_once dirname(__FILE__) . '/InsecureHandler.php';
 require_once dirname(__FILE__) . '/Parrot.php';
@@ -21,7 +19,7 @@ require_once dirname(__FILE__) . '/Parrot.php';
 /**
  * Helper methods common to all handler test cases.
  */
-abstract class TestCase extends PHPUnit_Framework_TestCase
+abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     /** A Monolog handler configured to talk to the parrot server. */
     protected $handler;
@@ -32,7 +30,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     /** The licence key to use when testing. */
     protected $key = '0123456789012345678901234567890123456789';
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->parrot = new Parrot();
 
@@ -41,7 +39,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
         $this->handler->setHost('127.0.0.1:' . $this->parrot->getPort());
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->handler);
         unset($this->parrot);
@@ -59,7 +57,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
      * @param array  $headers
      * @param string $msg
      */
-    protected function assertContentType($type, array $headers, $msg = null)
+    protected function assertContentType($type, array $headers, $msg = '')
     {
         $this->assertArrayHasKey('Content-Type', $headers);
         $this->assertCount(1, $headers['Content-Type']);
@@ -73,7 +71,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
      * @param array  $headers
      * @param string $msg
      */
-    protected function assertLicenseKey($key, array $headers, $msg = null)
+    protected function assertLicenseKey($key, array $headers, $msg = '')
     {
         $this->assertArrayHasKey('X-License-Key', $headers);
         $this->assertCount(1, $headers['X-License-Key']);
@@ -87,7 +85,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
      * @param string $actual   The actual JSON for the log batch.
      * @param string $msg
      */
-    protected function assertLogBatch(array $expected, $actual, $msg = null)
+    protected function assertLogBatch(array $expected, $actual, $msg = '')
     {
         $expected = $this->sanitiseLogBatch($expected);
         $actual = $this->sanitiseLogBatch(json_decode($actual, true));
@@ -102,7 +100,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
      * @param string $actual   The actual JSON for the log record.
      * @param string $msg
      */
-    protected function assertLogRecord(array $expected, $actual, $msg = null)
+    protected function assertLogRecord(array $expected, $actual, $msg = '')
     {
         $expected = $this->sanitiseLogRecord($expected, true);
         $actual = $this->sanitiseLogRecord(json_decode($actual, true));

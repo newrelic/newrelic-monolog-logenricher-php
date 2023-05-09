@@ -13,6 +13,7 @@
 
 namespace NewRelic\Monolog\Enricher;
 
+use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
 
 /**
@@ -24,25 +25,20 @@ class Processor implements ProcessorInterface
      * Returns the given record with the New Relic linking metadata added
      * if a compatible New Relic extension is loaded, otherwise returns the
      * given record unmodified
-     *
-     * @param  array $record A Monolog record
-     * @return array Given record, with New Relic metadata added if available
      */
-    public function __invoke(array $record)
+    public function __invoke(LogRecord $record): LogRecord
     {
         if ($this->contextAvailable()) {
             $linking_data = newrelic_get_linking_metadata();
-            $record['extra']['newrelic-context'] = $linking_data;
+            $record->extra['newrelic-context'] = $linking_data;
         }
         return $record;
     }
 
     /**
      * Checks if a compatible New Relic extension (v9.3 or higher) is loaded
-     *
-     * @return bool
      */
-    protected function contextAvailable()
+    protected function contextAvailable(): bool
     {
         return function_exists('newrelic_get_linking_metadata');
     }

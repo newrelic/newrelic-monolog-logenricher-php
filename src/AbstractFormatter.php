@@ -13,8 +13,9 @@
 
 namespace NewRelic\Monolog\Enricher;
 
+use DateTimeImmutable;
+use JsonSerializable;
 use Monolog\Formatter\JsonFormatter;
-use Monolog\Logger;
 
 /**
  * Formats record as a JSON object with transformations necessary for
@@ -28,7 +29,7 @@ abstract class AbstractFormatter extends JsonFormatter
      */
     public function __construct(
         $batchMode = self::BATCH_MODE_NEWLINES,
-        $appendNewline = true
+        bool $appendNewline = true
     ) {
         // BATCH_MODE_NEWLINES is required for batch compatibility with New
         // Relic log forwarder plugins, which handle batching records. When
@@ -49,7 +50,7 @@ abstract class AbstractFormatter extends JsonFormatter
      * @param int $depth
      * @return mixed
      */
-    protected function normalize($data, $depth = 0)
+    protected function normalize(mixed $data, int $depth = 0): mixed
     {
         if ($depth == 0) {
             if (isset($data['extra']['newrelic-context'])) {
@@ -59,7 +60,24 @@ abstract class AbstractFormatter extends JsonFormatter
             $data['timestamp'] = intval(
                 $data['datetime']->format('U.u') * 1000
             );
+            $data['datetime'] = $this->convertDataTime($data['datetime']);
         }
         return parent::normalize($data, $depth);
+    }
+
+    private function convertDataTime(
+        DateTimeImmutable $dateTime
+    ): JsonSerializable {
+        return new class ($dateTime) implements JsonSerializable {
+            public function __construct(
+                private readonly DateTimeImmutable $data
+            ) {
+            }
+
+            public function jsonSerialize(): mixed
+            {
+                return json_decode(json_encode($this->data), true);
+            }
+        };
     }
 }

@@ -12,75 +12,14 @@
 
 namespace NewRelic\Monolog\Enricher;
 
+use DateTimeImmutable;
+use Monolog\Level;
 use Monolog\Logger;
-use PHPUnit_Framework_TestCase;
+use Monolog\LogRecord;
+use PHPUnit\Framework\TestCase;
 
-class FormatterTest extends PHPUnit_Framework_TestCase
+class FormatterTest extends TestCase
 {
-
-    /**
-     * Generates a Monolog record that optionally contains New Relic
-     * context information (enabled by default)
-     *
-     * @param bool $withNrContext
-     * @return array
-     */
-    private function getRecord($withNrContext)
-    {
-        $record = array(
-            'message' => 'test',
-            'context' => array(),
-            'level' => 300,
-            'level_name' => 'WARNING',
-            'channel' => 'test',
-            'extra' => array(),
-            'datetime' => new \DateTime("now", new \DateTimeZone("UTC")),
-        );
-
-        if ($withNrContext) {
-            $nr_context = array(
-                'hostname' => 'example.host',
-                'entity.name' => 'Processor Tests',
-                'entity.type' => 'SERVICE',
-                'trace.id' => 'aabb1234AABB4321',
-                'span.id' => 'wxyz9876WXYZ6789'
-            );
-            $record['extra']['newrelic-context'] = $nr_context;
-        }
-
-        return $record;
-    }
-
-    /**
-     * Generates the expected string for a given record after formatting.
-     * Optionally appends a trailing newline (enabled by default)
-     *
-     * @param array $record
-     * @param bool $appendNewline
-     * @return array
-     */
-    private function getExpectedForRecord($record, $appendNewline = true)
-    {
-        $expected =
-        '{"message":"test",'
-        . '"context":' . (Logger::API == 1 ? '[]' : '{}') . ','
-        . '"level":300,"level_name":"WARNING","channel":"test",'
-        . '"extra":' . (Logger::API == 1 ? '[]' : '{}') . ','
-        . '"datetime":' . json_encode($record['datetime']) . ',';
-
-        if (isset($record['extra']['newrelic-context'])) {
-            $expected = $expected . '"hostname":"example.host",'
-                . '"entity.name":"Processor Tests","entity.type":"SERVICE",'
-                . '"trace.id":"aabb1234AABB4321","span.id":"wxyz9876WXYZ6789",';
-        }
-
-        $expected = $expected . '"timestamp":'
-            . intval($record['datetime']->format('U.u') * 1000) . '}'
-            . ($appendNewline ? "\n" : '');
-
-        return $expected;
-    }
-
     /**
      * Verifies constructor sets expected parameters and respects overrides
      */
@@ -113,14 +52,14 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         // Test with trailing newline
         $formatter = new Formatter();
         $record = $this->getRecord(true);
-        $this->assertEquals(
+        $this->assertJsonStringEqualsJsonString(
             $this->getExpectedForRecord($record),
             $formatter->format($record)
         );
 
         // Test without trailing newline
         $formatter = new Formatter(Formatter::BATCH_MODE_NEWLINES, false);
-        $this->assertEquals(
+        $this->assertJsonStringEqualsJsonString(
             $this->getExpectedForRecord($record, false),
             $formatter->format($record)
         );
@@ -132,6 +71,69 @@ class FormatterTest extends PHPUnit_Framework_TestCase
             $this->getExpectedForRecord($record),
             $formatter->format($record)
         );
+    }
+
+    /**
+     * Generates a Monolog record that optionally contains New Relic
+     * context information (enabled by default)
+     *
+     * @param bool $withNrContext
+     * @return array
+     */
+    private function getRecord($withNrContext)
+    {
+        $record = new LogRecord(
+            new DateTimeImmutable("now", new \DateTimeZone("UTC")),
+            'test',
+            Level::Warning,
+            'test',
+            [],
+            [],
+        );
+
+        if ($withNrContext) {
+            $record->extra['newrelic-context'] = [
+                'hostname' => 'example.host',
+                'entity.name' => 'Processor Tests',
+                'entity.type' => 'SERVICE',
+                'trace.id' => 'aabb1234AABB4321',
+                'span.id' => 'wxyz9876WXYZ6789'
+            ];
+        }
+
+        return $record;
+    }
+
+    /**
+     * Generates the expected string for a given record after formatting.
+     * Optionally appends a trailing newline (enabled by default)
+     *
+     * @param array $record
+     * @param bool $appendNewline
+     * @return array
+     */
+    private function getExpectedForRecord($record, $appendNewline = true)
+    {
+        $expected =
+            '{"message":"test",'
+            . '"context":' . (Logger::API == 1 ? '[]' : '{}') . ','
+            . '"level":300,"level_name":"WARNING","channel":"test",'
+
+            . '"datetime":' . json_encode($record['datetime']) . ','
+            . '"extra":' . (Logger::API == 1 ? '[]' : '{}') . ','
+        ;
+
+        if (isset($record['extra']['newrelic-context'])) {
+            $expected = $expected . '"hostname":"example.host",'
+                . '"entity.name":"Processor Tests","entity.type":"SERVICE",'
+                . '"trace.id":"aabb1234AABB4321","span.id":"wxyz9876WXYZ6789",';
+        }
+
+        $expected = $expected . '"timestamp":'
+            . intval($record['datetime']->format('U.u') * 1000) . '}'
+            . ($appendNewline ? "\n" : '');
+
+        return $expected;
     }
 
     /**
@@ -148,7 +150,7 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals(
-            // Test records when batch processed as a JSON array.
+        // Test records when batch processed as a JSON array.
             '[' . $this->getExpectedForRecord($records[0], false) . ','
             . $this->getExpectedForRecord($records[1], false) . ']',
             $formatter->formatBatch($records)
@@ -163,8 +165,8 @@ class FormatterTest extends PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals(
-            // Separate entries by newline, however do not append final newline
-            // to match Monolog\JsonFormatter::formatBatchNewlines behavior
+        // Separate entries by newline, however do not append final newline
+        // to match Monolog\JsonFormatter::formatBatchNewlines behavior
             $this->getExpectedForRecord($records[0])
             . $this->getExpectedForRecord($records[1], false),
             $formatter->formatBatch($records)

@@ -1,6 +1,8 @@
 # We won't commit composer.lock to simplify running tests against different PHP
 # and Monolog versions.
 composer.lock
-
 coverage
-vendor
+**/vendor
+.idea
+**/.phpunit.cache
+**/.phpunit.result.cache

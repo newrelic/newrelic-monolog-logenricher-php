@@ -21,5 +21,5 @@ use NewRelic\Monolog\Enricher\Handler;
  */
 class InsecureHandler extends Handler
 {
-    protected $protocol = 'http://';
+    protected string $protocol = 'http://';
 }

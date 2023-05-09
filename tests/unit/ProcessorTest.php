@@ -13,43 +13,14 @@
 
 namespace NewRelic\Monolog\Enricher;
 
-use PHPUnit_Framework_TestCase;
+use DateTimeImmutable;
+use DateTimeZone;
+use Monolog\Level;
+use Monolog\LogRecord;
+use PHPUnit\Framework\TestCase;
 
-/**
- * Override the New Relic PHP Extension's `newrelic_get_linking_metadata()`
- * function to mock a response
- *
- * @return array
- */
-function newrelic_get_linking_metadata()
+class ProcessorTest extends TestCase
 {
-    return array('hostname' => 'example.host',
-                 'entity.name' => 'Processor Tests',
-                 'entity.type' => 'SERVICE');
-}
-
-class ProcessorTest extends PHPUnit_Framework_TestCase
-{
-    /**
-     * getMockedProcessor returns a mocked NewRelic\Monolog\Enricher\Processor
-     * that is configured to return a set value in
-     * `Processor::contextAvailable`. This allows testing scenarios where a
-     * compatible New Relic extension (v9.3 or higher) is not available.
-     *
-     * @param bool $nr_ext_compat Whether a compatible extension was 'found'
-     * @return MockedProcessor
-     */
-    private function getMockedProcessor($nr_ext_compat)
-    {
-        $proc = $this->getMockBuilder('NewRelic\Monolog\Enricher\Processor')
-                     ->setMethods(array('contextAvailable'))
-                     ->getMock();
-        $proc->method('contextAvailable')
-             ->willReturn($nr_ext_compat);
-
-        return $proc;
-    }
-
     /**
      * Tests that the array returned by `newrelic_get_linking_metadata()`
      * is inserted at `$logRecord['extra']['newrelic-context'] when a
@@ -57,10 +28,17 @@ class ProcessorTest extends PHPUnit_Framework_TestCase
      */
     public function testInvoke()
     {
-        $input = array('foo' => 'bar');
+        $record = new LogRecord(
+            new DateTimeImmutable("now", new DateTimeZone("UTC")),
+            'test',
+            Level::Warning,
+            'test',
+            [],
+            [],
+        );
 
         $proc = $this->getMockedProcessor(true);
-        $enriched_record = $proc($input);
+        $enriched_record = $proc($record);
 
         $expected = newrelic_get_linking_metadata();
         $got = $enriched_record['extra']['newrelic-context'];
@@ -68,14 +46,54 @@ class ProcessorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * getMockedProcessor returns a mocked NewRelic\Monolog\Enricher\Processor
+     * that is configured to return a set value in
+     * `Processor::contextAvailable`. This allows testing scenarios where a
+     * compatible New Relic extension (v9.3 or higher) is not available.
+     *
+     * @param bool $nr_ext_compat Whether a compatible extension was 'found'
+     * @return Processor
+     */
+    private function getMockedProcessor(bool $nr_ext_compat): Processor
+    {
+        return new class ($nr_ext_compat) extends Processor {
+            public function __construct(
+                private readonly bool $newRelicExtensionAvailable
+            ) {
+            }
+
+            protected function contextAvailable(): bool
+            {
+                return $this->newRelicExtensionAvailable;
+            }
+        };
+    }
+
+    /**
      * Tests that the given Monolog record is returned unchanged when a
      * compatible New Relic extension is not loaded
      */
-    public function testInputPassthroughWhenNewRelicNotLoaded()
+    public function testInputPassThroughWhenNewRelicNotLoaded()
     {
-        $input = array('foo' => 'bar');
+        $record = new LogRecord(
+            new DateTimeImmutable("now", new DateTimeZone("UTC")),
+            'test',
+            Level::Warning,
+            'test',
+            [],
+            [],
+        );
         $proc = $this->getMockedProcessor(false);
 
-        $this->assertSame($input, $proc($input));
+        $this->assertSame($record, $proc($record));
     }
+}
+
+function newrelic_get_linking_metadata(): array
+{
+    return array(
+        'hostname' => 'example.host',
+        'entity.name' => 'Processor Tests',
+        'entity.type' => 'SERVICE'
+    );
 }

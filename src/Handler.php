@@ -16,24 +16,12 @@
 namespace NewRelic\Monolog\Enricher;
 
 use Monolog\Formatter\FormatterInterface;
-use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Handler\Curl;
 use Monolog\Handler\HandlerInterface;
-use Monolog\Logger;
+use Monolog\LogRecord;
 use Monolog\Util;
 
 class Handler extends AbstractHandler
 {
-    /**
-     * Delegates upload of single record to send()
-     *
-     * @param array $record
-     */
-    protected function write(array $record): void
-    {
-        $this->send($record["formatted"]);
-    }
-
     /**
      * Iterates over batched data, filtering out logs with levels lower
      * than the constructed threshold. If applicable logs are found, they
@@ -46,7 +34,7 @@ class Handler extends AbstractHandler
     {
         $level = $this->level;
         $records = array_filter($records, function ($record) use ($level) {
-            return ($record['level'] >= $level);
+            return ($record->level->value >= $level->value);
         });
         if ($records) {
             $this->sendBatch($this->getFormatter()->formatBatch($records));
@@ -71,6 +59,16 @@ class Handler extends AbstractHandler
             'NewRelic\Monolog\Enricher\Handler is only compatible with '
             . 'NewRelic\Monolog\Enricher\Formatter'
         );
+    }
+
+    /**
+     * Delegates upload of single record to send()
+     *
+     * @param array $record
+     */
+    protected function write(LogRecord $record): void
+    {
+        $this->send($record["formatted"]);
     }
 
     /**

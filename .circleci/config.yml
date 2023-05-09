@@ -1,56 +1,31 @@
 version: 2
 
 # Generic test steps for most of the unit test targets.
-#
-# These should work on any "php" Docker Hub image for version 5.4 or newer:
-# https://hub.docker.com/_/php/
 test_steps: &test_steps
-  # CircleCI expects Git to be available within the container, and Composer
-  # will be quite a bit happier if unzip is available.
+  # Composer will be quite a bit happier if unzip is available.
   - run:
       command: |
         apt-get update
-        apt-get -y install git unzip
+        apt-get -y install unzip
       name: Install platform dependencies
 
   - checkout
 
-  # We'll grab and use Composer 1.9.1. Composer is bundled within the CircleCI
-  # PHP images, but these don't go back further than PHP 5.6, and we need older
-  # versions. For consistency, we'll do this on all PHP images.
-  - restore_cache:
-      keys:
-        - v1-{{ .Environment.CIRCLE_JOB }}-composer-1.9.1
-
-  - run:
-      # If and when you want to upgrade the Composer version, note that the
-      # SHA-256 sum below will need to be updated as well.
-      command: |
-        curl -O https://getcomposer.org/download/1.9.1/composer.phar
-        echo '1f210b9037fcf82670d75892dfc44400f13fe9ada7af9e787f93e50e3b764111 *composer.phar' | sha256sum -c
-        chmod 755 composer.phar
-      name: Download and verify Composer
-
-  - save_cache:
-      key: v1-{{ .Environment.CIRCLE_JOB }}-composer-1.9.1
-      paths:
-        - ./composer.phar
-
   # Now we'll actually install the packages required to test this package.
   - restore_cache:
       keys:
-        - v1-{{ .Environment.CIRCLE_JOB }}-dependencies-{{ checksum "composer.json" }}
-        - v1-{{ .Environment.CIRCLE_JOB }}-dependencies-
+        - v3-{{ .Environment.CIRCLE_JOB }}-dependencies-{{ checksum "composer.json" }}
+        - v3-{{ .Environment.CIRCLE_JOB }}-dependencies-
 
   - run: ./composer.phar install -n --prefer-dist
 
   - save_cache:
-      key: v1-{{ .Environment.CIRCLE_JOB }}-dependencies-{{ checksum "composer.json" }}
+      key: v3-{{ .Environment.CIRCLE_JOB }}-dependencies-{{ checksum "composer.json" }}
       paths:
         - ./vendor
 
   # Finally, we'll run the unit tests.
-  - run: ./composer.phar test
+  - run: ./composer.phar test-unit
 
 jobs:
   coding_standard:
@@ -60,7 +35,7 @@ jobs:
       #
       # Note that the version of PHP doesn't matter here, provided it's a
       # version that PHP_CodeSniffer 3.5 supports (which is PHP 5.4 or newer).
-      - image: circleci/php:7-cli
+      - image: cimg/php:8.1
 
     # The coding standard job shares some concepts with the test_steps defined
     # above, but is defined separately due to YAML's inability to merge lists.
@@ -69,113 +44,78 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-cs-dependencies-{{ checksum "composer.json" }}
-            - v1-cs-dependencies-
+            - v3-cs-dependencies-{{ checksum "composer.json" }}
+            - v3-cs-dependencies-
 
       - run: composer install -n --prefer-dist
 
       - save_cache:
-          key: v1-cs-dependencies-{{ checksum "composer.json" }}
+          key: v3-cs-dependencies-{{ checksum "composer.json" }}
           paths:
             - ./vendor
 
-      - run: composer coding-standard-check
+      - run: composer cs
 
-  "php-7.2":
+  "php-8.1":
     docker:
-      - image: php:7.2.25-cli
-
-    steps: *test_steps
-
-  "php-7.3":
-    docker:
-      - image: php:7.3.12-cli
-
-    steps: *test_steps
-
-  "php-7.4":
-    docker:
-      - image: php:7.4.0-cli
+      - image: php:8.1-cli
 
     steps: *test_steps
 
   integration:
     docker:
-      - image: circleci/php:7.2-cli
+      - image: cimg/php:8.1-cli
 
     steps:
       - checkout
 
       - restore_cache:
           keys:
-            - v1-integration-dependencies-{{ checksum "composer.json" }}
-            - v1-integration-dependencies-
+            - v3-integration-dependencies-{{ checksum "composer.json" }}
+            - v3-integration-dependencies-
 
       - run: composer install -n --prefer-dist
 
       - save_cache:
-          key: v1-integration-dependencies-{{ checksum "composer.json" }}
+          key: v3-integration-dependencies-{{ checksum "composer.json" }}
           paths:
             - ./vendor
 
       - restore_cache:
           keys:
-            - v1-integration-server-{{ checksum "tests/integration/server/composer.lock" }}
-            - v1-integration-server-
+            - v3-integration-server-{{ checksum "tests/integration/server/composer.lock" }}
+            - v3-integration-server-
 
       - run: composer install -d tests/integration/server --prefer-dist
 
       - save_cache:
-          key: v1-integration-server-{{ checksum "tests/integration/server/composer.lock" }}
+          key: v3-integration-server-{{ checksum "tests/integration/server/composer.lock" }}
           paths:
             - ./tests/integration/server/vendor
 
       - restore_cache:
           keys:
-            - v1-integration-v1-{{ checksum "tests/integration/v1/composer.lock" }}
-            - v1-integration-v1-
+            - v3-integration-v3-{{ checksum "tests/integration/v1/composer.lock" }}
+            - v3-integration-v3-
 
       - run: composer install -d tests/integration/v1 --prefer-dist
 
       - save_cache:
-          key: v1-integration-v1-{{ checksum "tests/integration/v1/composer.lock" }}
+          key: v3-integration-v3-{{ checksum "tests/integration/v1/composer.lock" }}
           paths:
-            - ./tests/integration/v1/vendor
-
-      - restore_cache:
-          keys:
-            - v1-integration-v2-{{ checksum "tests/integration/v2/composer.lock" }}
-            - v1-integration-v2-
-
-      - run: composer install -d tests/integration/v2 --prefer-dist
-
-      - save_cache:
-          key: v1-integration-v2-{{ checksum "tests/integration/v2/composer.lock" }}
-          paths:
-            - ./tests/integration/v2/vendor
+            - ./tests/integration/v3/vendor
 
       - run:
-          command: php -d error_reporting=24575 vendor/bin/phpunit
-          name: Monolog 1 integration tests
-          working_directory: tests/integration/v1
-
-      - run:
-          command: php -d error_reporting=24575 vendor/bin/phpunit
-          name: Monolog 2 integration tests
-          working_directory: tests/integration/v2
+          command: composer test-integration
+          name: Monolog 3 integration tests
+          working_directory: tests/integration/v3
 
 workflows:
   version: 2
   test:
     jobs:
       - coding_standard
-      - "php-7.2":
-          requires:
-            - coding_standard
-      - "php-7.3":
-          requires:
-            - coding_standard
-      - "php-7.4":
+      - "php-8.1":
           requires:
             - coding_standard
       - integration:

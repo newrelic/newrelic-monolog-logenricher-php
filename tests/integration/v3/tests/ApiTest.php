@@ -10,15 +10,15 @@
  * @author New Relic PHP <php-agent@newrelic.com>
  */
 
-namespace NewRelic\Monolog\Enricher\IntegrationTest\V2;
+namespace NewRelic\Monolog\Enricher\IntegrationTest\V1;
 
 use Monolog\Logger;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ApiTest extends PHPUnit_Framework_TestCase
+class ApiTest extends TestCase
 {
     public function testApiVersion()
     {
-        $this->assertSame(2, Logger::API);
+        $this->assertSame(3, Logger::API);
     }
 }

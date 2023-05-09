@@ -18,6 +18,9 @@
 
 namespace NewRelic\Monolog\Enricher;
 
+use Monolog\LogRecord;
+use stdClass;
+
 /**
  * Formats record as a JSON object with transformations necessary for
  * ingestion by New Relic Logs
@@ -28,26 +31,26 @@ class Formatter extends AbstractFormatter
      * Normalizes each record individually before JSON encoding the complete
      * batch of records as a JSON array.
      *
-     * @param array $records
+     * @param LogRecord[] $records
      * @return string
      */
     protected function formatBatchJson(array $records): string
     {
         foreach ($records as $key => $record) {
-            $normalized = $this->normalize($record);
+            $normalized = $this->normalize($record->toArray());
 
             // Adhere to format of Monolog 2.x JSON format
             if (
                 isset($normalized['context'])
                 && $normalized['context'] === []
             ) {
-                $normalized['context'] = new \stdClass();
+                $normalized['context'] = new stdClass();
             }
             if (
                 isset($normalized['extra'])
                 && $normalized['extra'] === []
             ) {
-                $normalized['extra'] = new \stdClass();
+                $normalized['extra'] = new stdClass();
             }
 
             $records[$key] = $normalized;

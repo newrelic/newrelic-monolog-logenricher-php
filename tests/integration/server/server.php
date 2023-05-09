@@ -13,18 +13,20 @@
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
-use React\EventLoop\Factory;
-use React\Http\Response;
-use React\Http\Server as HttpServer;
-use React\Socket\Server as SocketServer;
+use React\EventLoop\Loop;
+use React\Http\HttpServer;
+use React\Http\Message\Response;
+use React\Socket\SocketServer;
+
+use function FastRoute\simpleDispatcher;
 
 require dirname(__FILE__) . '/vendor/autoload.php';
 
 // Set up the event loop.
-$loop = Factory::create();
+$loop = Loop::get();
 
 // Set up a basic route dispatcher.
-$dispatcher = \FastRoute\simpleDispatcher(
+$dispatcher = simpleDispatcher(
     function (RouteCollector $routes) use ($loop) {
         $lastPost = null;
 
@@ -33,7 +35,7 @@ $dispatcher = \FastRoute\simpleDispatcher(
             '/log/v1',
             function (ServerRequestInterface $request) use (&$lastPost) {
                 $lastPost = [
-                    'body'    => $request->getBody()->getContents(),
+                    'body' => $request->getBody()->getContents(),
                     'headers' => $request->getHeaders(),
                 ];
 
@@ -129,15 +131,17 @@ $server = new HttpServer(
 );
 
 // Listen on a random port.
-$socket = new SocketServer('0.0.0.0:0', $loop);
+$socket = new SocketServer('0.0.0.0:0', [], $loop);
 $server->listen($socket);
 
 // Set up a timer to output the port to stdout so the caller knows how to talk
 // to this server once it's up and running.
 $loop->futureTick(function () use ($socket) {
-    echo json_encode([
-        'port' => parse_url($socket->getAddress(), PHP_URL_PORT),
-    ]) . "\n";
+    echo json_encode(
+        [
+                'port' => parse_url($socket->getAddress(), PHP_URL_PORT),
+            ]
+    ) . "\n";
     flush();
 });
 

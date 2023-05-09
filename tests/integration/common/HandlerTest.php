@@ -16,20 +16,13 @@ namespace {
         // that the Processor actually tries to call the namespaced version.
         function newrelic_get_linking_metadata()
         {
-            return NewRelic\Monolog\Enricher\newrelic_get_linking_metadata();
+            return array('hostname' => 'example.host',
+                'entity.name' => 'Processor Tests',
+                'entity.type' => 'SERVICE');
         }
     }
 }
-namespace NewRelic\Monolog\Enricher {
-    // This function provides the effective mock for
-    // newrelic_get_linking_metadata().
-    function newrelic_get_linking_metadata()
-    {
-        return array('hostname' => 'example.host',
-                     'entity.name' => 'Processor Tests',
-                     'entity.type' => 'SERVICE');
-    }
-}
+
 namespace NewRelic\Monolog\Enricher\IntegrationTest {
     use Monolog\Handler\BufferHandler;
     use Monolog\Logger;
