@@ -216,7 +216,7 @@ composer install
 This project conforms to [PSR-12](https://www.php-fig.org/psr/psr-12/), with a
 soft line length limit of 80 characters.
 
-[PHP\_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) is used to
+[PHP\_CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer) is used to
 ensure conformity. You can run `phpcs` to check the current code via the
 following Composer script:
 
